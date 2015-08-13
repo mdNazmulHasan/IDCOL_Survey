@@ -23,19 +23,20 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity{
+    ArrayList<String>answerlist;
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
+        answerlist=new ArrayList<>();
         showService();
-
     }
 
-    private void createRadioButton(int number) {
+    private void createRadioButton(int number, ArrayList<String> answerlist) {
         LinearLayout mLinearLayout = (LinearLayout) findViewById(R.id.linear1);
 
         //create text button
@@ -47,7 +48,7 @@ public class MainActivity extends AppCompatActivity{
         for (int i = 0; i < number; i++) {
             rb[i] = new RadioButton(this);
             rg.addView(rb[i]);
-            rb[i].setText("ok");
+            rb[i].setText(answerlist.get(i));
 
         }
         mLinearLayout.addView(rg);
@@ -70,7 +71,14 @@ public class MainActivity extends AppCompatActivity{
                             String numberFromJson=jsonObject.getString("NoOfAnswer");
                             int number=Integer.parseInt(numberFromJson);
                             Toast.makeText(getApplicationContext(),String.valueOf(number),Toast.LENGTH_LONG).show();
-                            createRadioButton(number);
+
+                            JSONArray answerArray=jsonObject.getJSONArray("AnswerList");
+                            for(int i=0;i<answerArray.length();i++){
+                                String options=answerArray.getJSONObject(i).getString("Description");
+                                answerlist.add(options);
+
+                            }
+                            createRadioButton(number,answerlist);
 
 
                         } catch (JSONException e) {

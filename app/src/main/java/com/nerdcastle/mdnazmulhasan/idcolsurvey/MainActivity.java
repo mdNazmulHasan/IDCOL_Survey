@@ -1,13 +1,10 @@
 package com.nerdcastle.mdnazmulhasan.idcolsurvey;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -23,10 +20,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity{
-   // ArrayList<JSONObject>answerlist;
+
+    RadioGroup radioGroup;
+    // ArrayList<JSONObject>answerlist;
 
 
     public void onCreate(Bundle savedInstanceState) {
@@ -42,19 +39,20 @@ public class MainActivity extends AppCompatActivity{
         //create text button
 
         // create radio button
-        final RadioButton[] rb = new RadioButton[number];
-        RadioGroup rg = new RadioGroup(this);
-        rg.setOrientation(RadioGroup.VERTICAL);
+        final RadioButton[] radioButtons = new RadioButton[number];
+        radioGroup = new RadioGroup(this);
+        radioGroup.setOrientation(RadioGroup.VERTICAL);
         for (int i = 0; i < number; i++) {
-            rb[i] = new RadioButton(this);
-            rg.addView(rb[i]);
-            //rb[i].setTag();
-            rb[i].setTextColor(Color.BLACK);
-           /* rb[i].setTextSize(Typed);*/
-            rb[i].setText(answerlist.getJSONObject(i).getString("Description"));
+            radioButtons[i] = new RadioButton(this);
+            radioGroup.addView(radioButtons[i]);
+            radioButtons[i].setTag(answerlist.getJSONObject(i));
+            radioButtons[i].setTextColor(Color.BLACK);
+            radioButtons[i].setTypeface(Typeface.DEFAULT_BOLD);
+           /* radioButtons[i].setTextSize(Typed);*/
+            radioButtons[i].setText(answerlist.getJSONObject(i).getString("Description"));
 
         }
-        mLinearLayout.addView(rg);
+        mLinearLayout.addView(radioGroup);
     }
 
     private void showService() {
@@ -106,5 +104,37 @@ public class MainActivity extends AppCompatActivity{
     }
 
 
+    public void send(View view) throws JSONException {
+        String selection;
+        if(radioGroup.getCheckedRadioButtonId()!=-1){
+            int id= radioGroup.getCheckedRadioButtonId();
+            View radioButton = radioGroup.findViewById(id);
+            int radioId = radioGroup.indexOfChild(radioButton);
+            RadioButton btn = (RadioButton) radioGroup.getChildAt(radioId);
+            selection = (String) btn.getText();
+            JSONObject answerobject= (JSONObject) btn.getTag();
+            final String questionId="&QuestionId="+answerobject.getString("QuestionId");
+            final String answerId="&FirstAnswerId="+answerobject.getString("Id");
+            final String data = "UserId=1"+questionId+answerId;
+            //Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
+            StringRequest request = new StringRequest(Request.Method.GET, "http://192.168.1.110/survey/api/answers?" + data, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    Toast.makeText(getApplicationContext(), answerId, Toast.LENGTH_LONG).show();
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    Toast.makeText(getApplicationContext(), volleyError.toString(), Toast.LENGTH_LONG).show();
+                }
+            });
+            AppController.getInstance().addToRequestQueue(request);
+
+        }
+        else{
+            selection="select one pls!";
+            Toast.makeText(getApplicationContext(),selection,Toast.LENGTH_LONG).show();
+        }
+    }
 
 }

@@ -14,6 +14,7 @@ import android.widget.Toast;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity{
 
     private void showService() {
         StringRequest stringrequest = new StringRequest(Request.Method.GET,
-                "http://192.168.1.110/survey/api/questions",
+                "http://192.168.3.63/survey/api/questions",
                 new Response.Listener<String>() {
 
                     @Override
@@ -113,14 +114,21 @@ public class MainActivity extends AppCompatActivity{
             RadioButton btn = (RadioButton) radioGroup.getChildAt(radioId);
             selection = (String) btn.getText();
             JSONObject answerobject= (JSONObject) btn.getTag();
-            final String questionId="&QuestionId="+answerobject.getString("QuestionId");
-            final String answerId="&FirstAnswerId="+answerobject.getString("Id");
-            final String data = "UserId=1"+questionId+answerId;
+            final String questionId=answerobject.getString("QuestionId");
+            final String answerId=answerobject.getString("Id");
+            //final String data = "UserId=1"+questionId+answerId;
+            final JSONObject requestJsonObject = new JSONObject();
+            requestJsonObject.put("UserId","1");
+            requestJsonObject.put("QuestionId", questionId);
+            requestJsonObject.put("FirstAnswerId", answerId);
+            /*JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST, ServiceUrls.LOGIN_URL, requestJsonObject, loginResponseListener, loginErrorListener);*/
             //Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
-            StringRequest request = new StringRequest(Request.Method.GET, "http://192.168.1.110/survey/api/answers?" + data, new Response.Listener<String>() {
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, "http://192.168.3.63/survey/api/answers",
+                    requestJsonObject, new Response.Listener<JSONObject>() {
+
                 @Override
-                public void onResponse(String response) {
-                    Toast.makeText(getApplicationContext(), answerId, Toast.LENGTH_LONG).show();
+                public void onResponse(JSONObject jsonObject) {
+                    Toast.makeText(getApplicationContext(), jsonObject.toString(), Toast.LENGTH_LONG).show();
                 }
             }, new Response.ErrorListener() {
                 @Override

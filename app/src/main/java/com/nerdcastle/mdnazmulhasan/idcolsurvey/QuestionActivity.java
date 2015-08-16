@@ -1,5 +1,6 @@
 package com.nerdcastle.mdnazmulhasan.idcolsurvey;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
@@ -21,15 +22,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MainActivity extends AppCompatActivity{
+public class QuestionActivity extends AppCompatActivity{
 
     RadioGroup radioGroup;
+    int index;
     // ArrayList<JSONObject>answerlist;
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        index= getIntent().getIntExtra("index",0);
         //answerlist=new ArrayList<>();
         showService();
     }
@@ -58,7 +61,7 @@ public class MainActivity extends AppCompatActivity{
 
     private void showService() {
         StringRequest stringrequest = new StringRequest(Request.Method.GET,
-                "http://192.168.3.63/survey/api/questions",
+                "http://192.168.1.110/survey/api/questions",
                 new Response.Listener<String>() {
 
                     @Override
@@ -66,7 +69,7 @@ public class MainActivity extends AppCompatActivity{
                         try {
                             JSONArray jsonArray = new JSONArray(response);
                             JSONObject jsonObject;
-                            jsonObject = jsonArray.getJSONObject(0);
+                            jsonObject = jsonArray.getJSONObject(index);
                             String questionFromJson = jsonObject.getString("Description");
                             TextView question = (TextView) findViewById(R.id.question);
                             question.setText(questionFromJson);
@@ -123,7 +126,7 @@ public class MainActivity extends AppCompatActivity{
             requestJsonObject.put("FirstAnswerId", answerId);
             /*JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST, ServiceUrls.LOGIN_URL, requestJsonObject, loginResponseListener, loginErrorListener);*/
             //Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, "http://192.168.3.63/survey/api/answers",
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, "http://192.168.1.110/survey/api/answers",
                     requestJsonObject, new Response.Listener<JSONObject>() {
 
                 @Override
@@ -137,6 +140,8 @@ public class MainActivity extends AppCompatActivity{
                 }
             });
             AppController.getInstance().addToRequestQueue(request);
+            Intent i=new Intent(getApplicationContext(),QuestionListActivity.class);
+            startActivity(i);
 
         }
         else{

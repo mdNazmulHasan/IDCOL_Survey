@@ -26,6 +26,8 @@ public class QuestionActivity extends AppCompatActivity{
 
     RadioGroup radioGroup;
     int index;
+    JSONArray jsonArray;
+    JSONObject jsonObject;
     // ArrayList<JSONObject>answerlist;
 
 
@@ -67,8 +69,7 @@ public class QuestionActivity extends AppCompatActivity{
                     @Override
                     public void onResponse(String response) {
                         try {
-                            JSONArray jsonArray = new JSONArray(response);
-                            JSONObject jsonObject;
+                            jsonArray = new JSONArray(response);
                             jsonObject = jsonArray.getJSONObject(index);
                             String questionFromJson = jsonObject.getString("Description");
                             TextView question = (TextView) findViewById(R.id.question);
@@ -140,8 +141,8 @@ public class QuestionActivity extends AppCompatActivity{
                 }
             });
             AppController.getInstance().addToRequestQueue(request);
-            Intent i=new Intent(getApplicationContext(),QuestionListActivity.class);
-            startActivity(i);
+            /*Intent i=new Intent(getApplicationContext(),QuestionListActivity.class);
+            startActivity(i);*/
 
         }
         else{

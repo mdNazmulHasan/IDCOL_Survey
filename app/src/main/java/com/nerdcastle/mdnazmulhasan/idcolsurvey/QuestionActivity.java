@@ -1,11 +1,11 @@
 package com.nerdcastle.mdnazmulhasan.idcolsurvey;
 
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -25,22 +25,38 @@ import org.json.JSONObject;
 public class QuestionActivity extends AppCompatActivity{
 
     RadioGroup radioGroup;
-    int index;
+    int index=0;
     JSONArray jsonArray;
     JSONObject jsonObject;
+    int number=0;
+    LinearLayout mLinearLayout;
     // ArrayList<JSONObject>answerlist;
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        index= getIntent().getIntExtra("index",0);
+        setContentView(R.layout.question);
+        mLinearLayout = (LinearLayout) findViewById(R.id.linear1);
+        /*index= getIntent().getIntExtra("index",0);*/
         //answerlist=new ArrayList<>();
         showService();
     }
 
+    private void createCheckBox(int number,JSONArray answerlist) throws JSONException {
+        for(int i = 0; i < number; i++) {
+            CheckBox ch = new CheckBox(getApplicationContext());
+            ch.setText(answerlist.getJSONObject(i).getString("Description"));
+            ch.setTextColor(Color.CYAN);
+            ch.setTypeface(Typeface.DEFAULT_BOLD);
+            ch.setTag(answerlist.getJSONObject(i));
+            mLinearLayout.addView(ch);
+        }
+
+    }
     private void createRadioButton(int number, JSONArray answerlist) throws JSONException {
-        LinearLayout mLinearLayout = (LinearLayout) findViewById(R.id.linear1);
+
+
+        mLinearLayout.removeAllViews();
 
         //create text button
 
@@ -52,7 +68,7 @@ public class QuestionActivity extends AppCompatActivity{
             radioButtons[i] = new RadioButton(this);
             radioGroup.addView(radioButtons[i]);
             radioButtons[i].setTag(answerlist.getJSONObject(i));
-            radioButtons[i].setTextColor(Color.BLACK);
+            radioButtons[i].setTextColor(Color.CYAN);
             radioButtons[i].setTypeface(Typeface.DEFAULT_BOLD);
            /* radioButtons[i].setTextSize(Typed);*/
             radioButtons[i].setText(answerlist.getJSONObject(i).getString("Description"));
@@ -63,7 +79,7 @@ public class QuestionActivity extends AppCompatActivity{
 
     private void showService() {
         StringRequest stringrequest = new StringRequest(Request.Method.GET,
-                "http://192.168.1.110/survey/api/questions",
+                "http://192.168.1.109/survey/api/questions",
                 new Response.Listener<String>() {
 
                     @Override
@@ -75,16 +91,12 @@ public class QuestionActivity extends AppCompatActivity{
                             TextView question = (TextView) findViewById(R.id.question);
                             question.setText(questionFromJson);
                             String numberFromJson = jsonObject.getString("NoOfAnswer");
-                            int number = Integer.parseInt(numberFromJson);
+                            number = Integer.parseInt(numberFromJson);
                             Toast.makeText(getApplicationContext(), String.valueOf(number), Toast.LENGTH_LONG).show();
 
                             JSONArray answerArray = jsonObject.getJSONArray("AnswerList");
-                            /*JSONObject answerObject = null;
-                            for (int i = 0; i < answerArray.length(); i++) {
-                                answerObject = answerArray.getJSONObject(i);
-                                //answerlist.add(options);
+                            //createCheckBox(number, answerArray);
 
-                            }*/
                             createRadioButton(number, answerArray);
 
 
@@ -125,9 +137,8 @@ public class QuestionActivity extends AppCompatActivity{
             requestJsonObject.put("UserId","1");
             requestJsonObject.put("QuestionId", questionId);
             requestJsonObject.put("FirstAnswerId", answerId);
-            /*JsonObjectRequest jsonObjReq = new JsonObjectRequest(Request.Method.POST, ServiceUrls.LOGIN_URL, requestJsonObject, loginResponseListener, loginErrorListener);*/
-            //Toast.makeText(getApplicationContext(), "ok", Toast.LENGTH_LONG).show();
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, "http://192.168.1.110/survey/api/answers",
+
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, "http://192.168.1.109/survey/api/answers",
                     requestJsonObject, new Response.Listener<JSONObject>() {
 
                 @Override
@@ -141,14 +152,17 @@ public class QuestionActivity extends AppCompatActivity{
                 }
             });
             AppController.getInstance().addToRequestQueue(request);
-            /*Intent i=new Intent(getApplicationContext(),QuestionListActivity.class);
-            startActivity(i);*/
+
 
         }
         else{
             selection="select one pls!";
             Toast.makeText(getApplicationContext(),selection,Toast.LENGTH_LONG).show();
         }
+        index++;
+        number=0;
+        showService();
     }
+    ;
 
 }

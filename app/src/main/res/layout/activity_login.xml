@@ -1,6 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#e3e3e3"
+    android:background="#607d8b"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="@dimen/activity_horizontal_margin"
@@ -18,10 +18,9 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
-            android:textStyle="bold"
             android:text="Welcome"
             android:textSize="30sp"
-            android:textColor="#2196f3"/>
+            android:textColor="#ffffff"/>
 
     </RelativeLayout>
 
@@ -41,6 +40,7 @@
                 android:id="@+id/username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="#ffffff"
                 android:inputType="textEmailAddress"
                 android:hint="Username"/>
 
@@ -57,6 +57,7 @@
                 android:id="@+id/password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="#ffffff"
                 android:inputType="textPassword"
                 android:hint="Password"/>
 
@@ -66,9 +67,10 @@
             android:id="@+id/btn"
             android:layout_marginTop="4dp"
             android:layout_width="match_parent"
-            android:onClick="onClick"
+            android:onClick="login"
+            android:background="#03A9F4"
             android:textColor="#ffffff"
-            android:background="#2196f3"
+            android:textStyle="bold"
             android:layout_height="wrap_content"
             android:text="Login"/>
 

@@ -4,7 +4,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2196f3"
+    android:background="#607d8b"
     >
     <TextView
         android:layout_width="wrap_content"
@@ -21,10 +21,10 @@
         android:layout_width="124dip"
         android:layout_height="124dip"
         android:layout_marginTop="80dp"
-        app:cb_color="#ffffff"
+        app:cb_color="#607d8b"
         android:onClick="start"
-        app:cb_pressedRingWidth="9dip"
-        android:src="@drawable/strt"
+        app:cb_pressedRingWidth="10dip"
+        android:src="@drawable/start"
         android:layout_gravity="center|center_horizontal" />
 
 

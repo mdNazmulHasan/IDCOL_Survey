@@ -12,6 +12,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -22,6 +23,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class QuestionActivity extends AppCompatActivity{
 
     RadioGroup radioGroup;
@@ -30,19 +33,18 @@ public class QuestionActivity extends AppCompatActivity{
     JSONObject jsonObject;
     int number=0;
     LinearLayout mLinearLayout;
-    // ArrayList<JSONObject>answerlist;
+    /*ArrayList<JSONObject> answerCollection=new ArrayList<>();*/
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.question);
         mLinearLayout = (LinearLayout) findViewById(R.id.linear1);
-        /*index= getIntent().getIntExtra("index",0);*/
-        //answerlist=new ArrayList<>();
         showService();
     }
 
     private void createCheckBox(int number,JSONArray answerlist) throws JSONException {
+
         for(int i = 0; i < number; i++) {
             CheckBox ch = new CheckBox(getApplicationContext());
             ch.setText(answerlist.getJSONObject(i).getString("Description"));
@@ -51,16 +53,9 @@ public class QuestionActivity extends AppCompatActivity{
             ch.setTag(answerlist.getJSONObject(i));
             mLinearLayout.addView(ch);
         }
-
     }
     private void createRadioButton(int number, JSONArray answerlist) throws JSONException {
-
-
         mLinearLayout.removeAllViews();
-
-        //create text button
-
-        // create radio button
         final RadioButton[] radioButtons = new RadioButton[number];
         radioGroup = new RadioGroup(this);
         radioGroup.setOrientation(RadioGroup.VERTICAL);
@@ -70,18 +65,25 @@ public class QuestionActivity extends AppCompatActivity{
             radioButtons[i].setTag(answerlist.getJSONObject(i));
             radioButtons[i].setTextColor(Color.CYAN);
             radioButtons[i].setTypeface(Typeface.DEFAULT_BOLD);
-           /* radioButtons[i].setTextSize(Typed);*/
             radioButtons[i].setText(answerlist.getJSONObject(i).getString("Description"));
 
         }
+
         mLinearLayout.addView(radioGroup);
     }
-
+    public void prev(View view){
+        if(index!=0){
+            index--;
+            showService();
+        }
+        else if(index==0){
+            Toast.makeText(getApplicationContext(),"there is nothing before this", Toast.LENGTH_LONG).show();
+        }
+    }
     private void showService() {
         StringRequest stringrequest = new StringRequest(Request.Method.GET,
                 "http://192.168.1.109/survey/api/questions",
                 new Response.Listener<String>() {
-
                     @Override
                     public void onResponse(String response) {
                         try {
@@ -95,6 +97,7 @@ public class QuestionActivity extends AppCompatActivity{
                             Toast.makeText(getApplicationContext(), String.valueOf(number), Toast.LENGTH_LONG).show();
 
                             JSONArray answerArray = jsonObject.getJSONArray("AnswerList");
+                            /*Toast.makeText(getApplicationContext(), answerCollection.toString(), Toast.LENGTH_LONG).show();*/
                             //createCheckBox(number, answerArray);
 
                             createRadioButton(number, answerArray);
@@ -114,9 +117,9 @@ public class QuestionActivity extends AppCompatActivity{
 
             }
         });
+        stringrequest.setRetryPolicy(new DefaultRetryPolicy(7000,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         AppController.getInstance().addToRequestQueue(stringrequest);
-
 
     }
 
@@ -128,11 +131,9 @@ public class QuestionActivity extends AppCompatActivity{
             View radioButton = radioGroup.findViewById(id);
             int radioId = radioGroup.indexOfChild(radioButton);
             RadioButton btn = (RadioButton) radioGroup.getChildAt(radioId);
-            selection = (String) btn.getText();
             JSONObject answerobject= (JSONObject) btn.getTag();
             final String questionId=answerobject.getString("QuestionId");
             final String answerId=answerobject.getString("Id");
-            //final String data = "UserId=1"+questionId+answerId;
             final JSONObject requestJsonObject = new JSONObject();
             requestJsonObject.put("UserId","1");
             requestJsonObject.put("QuestionId", questionId);
@@ -152,8 +153,6 @@ public class QuestionActivity extends AppCompatActivity{
                 }
             });
             AppController.getInstance().addToRequestQueue(request);
-
-
         }
         else{
             selection="select one pls!";

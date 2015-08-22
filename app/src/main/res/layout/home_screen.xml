@@ -24,7 +24,7 @@
         app:cb_color="#607d8b"
         android:onClick="start"
         app:cb_pressedRingWidth="10dip"
-        android:src="@drawable/start"
+        android:src="@drawable/strt"
         android:layout_gravity="center|center_horizontal" />
 
 

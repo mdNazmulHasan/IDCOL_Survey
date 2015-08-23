@@ -2,8 +2,8 @@ package com.nerdcastle.mdnazmulhasan.idcolsurvey;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -23,17 +23,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-
 public class QuestionActivity extends AppCompatActivity{
 
     RadioGroup radioGroup;
+    int sizeOfQuestionBank;
     int index=0;
     JSONArray jsonArray;
     JSONObject jsonObject;
     int number=0;
     LinearLayout mLinearLayout;
-    /*ArrayList<JSONObject> answerCollection=new ArrayList<>();*/
+    String questionFromJson;
+    String serialNmbr;
 
 
     public void onCreate(Bundle savedInstanceState) {
@@ -89,15 +89,17 @@ public class QuestionActivity extends AppCompatActivity{
                         try {
                             jsonArray = new JSONArray(response);
                             jsonObject = jsonArray.getJSONObject(index);
-                            String questionFromJson = jsonObject.getString("Description");
+                            sizeOfQuestionBank=jsonArray.length();
+                            Toast.makeText(getApplicationContext(), String.valueOf(sizeOfQuestionBank), Toast.LENGTH_LONG).show();
+                            questionFromJson = jsonObject.getString("Description");
+                            serialNmbr=jsonObject.getString("SerialNo");
                             TextView question = (TextView) findViewById(R.id.question);
-                            question.setText(questionFromJson);
+                            question.setText(serialNmbr+". "+questionFromJson);
                             String numberFromJson = jsonObject.getString("NoOfAnswer");
                             number = Integer.parseInt(numberFromJson);
                             Toast.makeText(getApplicationContext(), String.valueOf(number), Toast.LENGTH_LONG).show();
 
                             JSONArray answerArray = jsonObject.getJSONArray("AnswerList");
-                            /*Toast.makeText(getApplicationContext(), answerCollection.toString(), Toast.LENGTH_LONG).show();*/
                             //createCheckBox(number, answerArray);
 
                             createRadioButton(number, answerArray);
@@ -126,42 +128,50 @@ public class QuestionActivity extends AppCompatActivity{
 
     public void send(View view) throws JSONException {
         String selection;
-        if(radioGroup.getCheckedRadioButtonId()!=-1){
-            int id= radioGroup.getCheckedRadioButtonId();
-            View radioButton = radioGroup.findViewById(id);
-            int radioId = radioGroup.indexOfChild(radioButton);
-            RadioButton btn = (RadioButton) radioGroup.getChildAt(radioId);
-            JSONObject answerobject= (JSONObject) btn.getTag();
-            final String questionId=answerobject.getString("QuestionId");
-            final String answerId=answerobject.getString("Id");
-            final JSONObject requestJsonObject = new JSONObject();
-            requestJsonObject.put("UserId","1");
-            requestJsonObject.put("QuestionId", questionId);
-            requestJsonObject.put("FirstAnswerId", answerId);
+        try{
+            if(radioGroup.getCheckedRadioButtonId()!=-1){
+                int id= radioGroup.getCheckedRadioButtonId();
+                View radioButton = radioGroup.findViewById(id);
+                int radioId = radioGroup.indexOfChild(radioButton);
+                RadioButton btn = (RadioButton) radioGroup.getChildAt(radioId);
+                JSONObject answerobject= (JSONObject) btn.getTag();
+                final String questionId=answerobject.getString("QuestionId");
+                final String answerId=answerobject.getString("Id");
+                final JSONObject requestJsonObject = new JSONObject();
+                requestJsonObject.put("UserId","1");
+                requestJsonObject.put("QuestionId", questionId);
+                requestJsonObject.put("FirstAnswerId", answerId);
 
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, "http://192.168.1.109/survey/api/answers",
-                    requestJsonObject, new Response.Listener<JSONObject>() {
+                JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, "http://192.168.1.109/survey/api/answers",
+                        requestJsonObject, new Response.Listener<JSONObject>() {
 
-                @Override
-                public void onResponse(JSONObject jsonObject) {
-                    Toast.makeText(getApplicationContext(), jsonObject.toString(), Toast.LENGTH_LONG).show();
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    Toast.makeText(getApplicationContext(), volleyError.toString(), Toast.LENGTH_LONG).show();
-                }
-            });
-            AppController.getInstance().addToRequestQueue(request);
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        Toast.makeText(getApplicationContext(), jsonObject.toString(), Toast.LENGTH_LONG).show();
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        Toast.makeText(getApplicationContext(), volleyError.toString(), Toast.LENGTH_LONG).show();
+                    }
+                });
+                AppController.getInstance().addToRequestQueue(request);
+            }
+            else{
+                selection="select one pls!";
+                Toast.makeText(getApplicationContext(),selection,Toast.LENGTH_LONG).show();
+            }
+            if(index<sizeOfQuestionBank-1){
+                index++;
+                number=0;
+                showService();
+            }
+            else if(index==(sizeOfQuestionBank-1)){
+                Toast.makeText(getApplicationContext(),"Thats all there is.",Toast.LENGTH_LONG).show();
+            }
+
+        }catch (Exception e){
+            Toast.makeText(getApplicationContext(),"Check your internet connection",Toast.LENGTH_LONG).show();
         }
-        else{
-            selection="select one pls!";
-            Toast.makeText(getApplicationContext(),selection,Toast.LENGTH_LONG).show();
-        }
-        index++;
-        number=0;
-        showService();
     }
-    ;
-
 }

@@ -4,28 +4,29 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#607d8b"
-    >
+    android:background="#ffffff"
+    android:weightSum="1">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="IDCOL"
         android:layout_gravity="center"
         android:layout_marginTop="50dp"
-        android:textColor="#ffffff"
+        android:textColor="#607d8b"
         android:textSize="60sp"
         android:textStyle="bold"
         android:typeface="monospace"/>
 
     <at.markushi.ui.CircleButton
-        android:layout_width="124dip"
+        android:layout_width="148dp"
         android:layout_height="124dip"
         android:layout_marginTop="80dp"
         app:cb_color="#607d8b"
         android:onClick="start"
         app:cb_pressedRingWidth="10dip"
         android:src="@drawable/strt"
-        android:layout_gravity="center|center_horizontal" />
+        android:layout_gravity="center|center_horizontal"
+        android:layout_weight="0.17" />
 
 
 </LinearLayout>

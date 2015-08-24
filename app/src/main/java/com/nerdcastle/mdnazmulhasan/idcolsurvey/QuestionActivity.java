@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -17,7 +18,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
@@ -43,7 +43,7 @@ public class QuestionActivity extends AppCompatActivity{
     JSONArray answerArray;
     Boolean IsMultipleAnswer;
     ArrayList<JSONObject> answerCollection=new ArrayList<>();
-    JSONArray getAnswerArray=new JSONArray();
+
     JSONObject answerobject;
 
 
@@ -59,12 +59,19 @@ public class QuestionActivity extends AppCompatActivity{
         mLinearLayout.removeAllViews();
 
         for(int i = 0; i < number; i++) {
-            CheckBox ch = new CheckBox(getApplicationContext());
-            ch.setText(answerlist.getJSONObject(i).getString("Description"));
-            ch.setTextColor(Color.CYAN);
-            ch.setTypeface(Typeface.DEFAULT_BOLD);
-            ch.setTag(answerlist.getJSONObject(i));
-            mLinearLayout.addView(ch);
+            CheckBox checkBox = new CheckBox(getApplicationContext());
+            checkBox.setText(answerlist.getJSONObject(i).getString("Description"));
+            checkBox.setTextColor(Color.BLACK);
+            final float scale = this.getResources().getDisplayMetrics().density;
+            checkBox.setPadding(checkBox.getPaddingLeft() + (int) (10.0f * scale + 0.5f),
+                    checkBox.getPaddingTop(),
+                    checkBox.getPaddingRight(),
+                    checkBox.getPaddingBottom());
+            checkBox.setButtonDrawable(R.drawable.box);
+            checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            checkBox.setTypeface(Typeface.DEFAULT_BOLD);
+            checkBox.setTag(answerlist.getJSONObject(i));
+            mLinearLayout.addView(checkBox);
         }
     }
     private void createRadioButton(int number, JSONArray answerlist) throws JSONException {
@@ -76,7 +83,14 @@ public class QuestionActivity extends AppCompatActivity{
             radioButtons[i] = new RadioButton(this);
             radioGroup.addView(radioButtons[i]);
             radioButtons[i].setTag(answerlist.getJSONObject(i));
-            radioButtons[i].setTextColor(Color.CYAN);
+            radioButtons[i].setButtonDrawable(R.drawable.radio);
+            radioButtons[i].setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+            final float scale = this.getResources().getDisplayMetrics().density;
+            radioButtons[i].setPadding(radioButtons[i].getPaddingLeft() + (int)(10.0f * scale + 0.5f),
+                    radioButtons[i].getPaddingTop(),
+                    radioButtons[i].getPaddingRight(),
+                    radioButtons[i].getPaddingBottom());
+            radioButtons[i].setTextColor(Color.BLACK);
             radioButtons[i].setTypeface(Typeface.DEFAULT_BOLD);
             radioButtons[i].setText(answerlist.getJSONObject(i).getString("Description"));
 
@@ -134,7 +148,7 @@ public class QuestionActivity extends AppCompatActivity{
 
             }
         });
-        stringrequest.setRetryPolicy(new DefaultRetryPolicy(7000,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        stringrequest.setRetryPolicy(new DefaultRetryPolicy(1000,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         AppController.getInstance().addToRequestQueue(stringrequest);
 
@@ -143,6 +157,7 @@ public class QuestionActivity extends AppCompatActivity{
 
     public void send(View view) throws JSONException {
         String selection;
+        JSONArray getAnswerArray=new JSONArray();
         try{
             if(!IsMultipleAnswer){
                 if(radioGroup.getCheckedRadioButtonId()!=-1){
@@ -151,20 +166,16 @@ public class QuestionActivity extends AppCompatActivity{
                     int radioId = radioGroup.indexOfChild(radioButton);
                     RadioButton btn = (RadioButton) radioGroup.getChildAt(radioId);
                     answerobject= (JSONObject) btn.getTag();
-                    final String questionId=answerobject.getString("QuestionId");
-                    final String answerId=answerobject.getString("Id");
-                    final JSONObject requestJsonObject = new JSONObject();
-                    requestJsonObject.put("UserId","1");
-                    requestJsonObject.put("QuestionId", questionId);
-                    requestJsonObject.put("FirstAnswerId", answerId);
+                   getAnswerArray.put(answerobject);
 
-                    JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, "http://192.168.1.109/survey/api/answers",
-                            requestJsonObject, new Response.Listener<JSONObject>() {
+                    JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://192.168.1.109/survey/api/answers",
+                            getAnswerArray, new Response.Listener<JSONArray>() {
 
                         @Override
-                        public void onResponse(JSONObject jsonObject) {
-                            Toast.makeText(getApplicationContext(), jsonObject.toString(), Toast.LENGTH_LONG).show();
+                        public void onResponse(JSONArray response) {
+                            Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
                         }
+
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError volleyError) {
@@ -180,6 +191,7 @@ public class QuestionActivity extends AppCompatActivity{
             }
             else if(IsMultipleAnswer){
                 for(int i=0; i<mLinearLayout.getChildCount(); i++) {
+
                     View nextChild = mLinearLayout.getChildAt(i);
                     if(nextChild instanceof CheckBox)
                     {
@@ -193,9 +205,6 @@ public class QuestionActivity extends AppCompatActivity{
                     }
 
                 }
-                JSONObject answer=new JSONObject();
-                answer.put("answers",getAnswerArray);
-                System.out.println(answer);
                 JsonArrayRequest request=new JsonArrayRequest(Request.Method.POST, "http://192.168.1.109/survey/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray response) {

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -43,8 +44,11 @@ public class QuestionActivity extends AppCompatActivity{
     JSONArray answerArray;
     Boolean IsMultipleAnswer;
     ArrayList<JSONObject> answerCollection=new ArrayList<>();
-
     JSONObject answerobject;
+    Button next;
+    Button prev;
+    String token="1234";
+    JSONObject tokenNumber;
 
 
 
@@ -52,6 +56,10 @@ public class QuestionActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.question);
         mLinearLayout = (LinearLayout) findViewById(R.id.linear1);
+        next= (Button) findViewById(R.id.next);
+        prev= (Button) findViewById(R.id.prev);
+        //token=getIntent().getStringExtra("token");
+
         showService();
     }
 
@@ -114,6 +122,8 @@ public class QuestionActivity extends AppCompatActivity{
                     @Override
                     public void onResponse(String response) {
                         try {
+                            next.setVisibility(View.VISIBLE);
+                            prev.setVisibility(View.VISIBLE);
                             jsonArray = new JSONArray(response);
                             jsonObject = jsonArray.getJSONObject(index);
                             sizeOfQuestionBank=jsonArray.length();
@@ -158,6 +168,10 @@ public class QuestionActivity extends AppCompatActivity{
     public void send(View view) throws JSONException {
         String selection;
         JSONArray getAnswerArray=new JSONArray();
+        tokenNumber=new JSONObject();
+        tokenNumber.put("Token",token);
+        System.out.println(tokenNumber);
+        Toast.makeText(getApplicationContext(), tokenNumber.toString(), Toast.LENGTH_LONG).show();
         try{
             if(!IsMultipleAnswer){
                 if(radioGroup.getCheckedRadioButtonId()!=-1){
@@ -166,7 +180,11 @@ public class QuestionActivity extends AppCompatActivity{
                     int radioId = radioGroup.indexOfChild(radioButton);
                     RadioButton btn = (RadioButton) radioGroup.getChildAt(radioId);
                     answerobject= (JSONObject) btn.getTag();
-                   getAnswerArray.put(answerobject);
+                    answerobject.put("Token",token);
+                    getAnswerArray.put(answerobject);
+                    getAnswerArray.put(tokenNumber);
+                    System.out.println(getAnswerArray);
+                    Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
 
                     JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://192.168.1.109/survey/api/answers",
                             getAnswerArray, new Response.Listener<JSONArray>() {
@@ -198,9 +216,11 @@ public class QuestionActivity extends AppCompatActivity{
                         CheckBox check = (CheckBox) nextChild;
                         if (check.isChecked()) {
                             answerobject= (JSONObject) check.getTag();
+                            answerobject.put("Token",token);
                             getAnswerArray.put(answerobject);
-                            Toast.makeText(getApplicationContext(),getAnswerArray.toString(),Toast.LENGTH_LONG).show();
+                            //getAnswerArray.put(tokenNumber);
                             System.out.println(getAnswerArray);
+                            Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
                         }
                     }
 

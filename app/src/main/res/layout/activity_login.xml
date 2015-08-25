@@ -20,7 +20,7 @@
             android:gravity="center"
             android:text="Welcome"
             android:textSize="30sp"
-            android:textColor="#ffffff"/>
+            android:textColor="#009688"/>
 
     </RelativeLayout>
 
@@ -40,7 +40,7 @@
                 android:id="@+id/username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#ffffff"
+                android:textColor="#009688"
                 android:inputType="textEmailAddress"
                 android:hint="Username"/>
 
@@ -57,7 +57,7 @@
                 android:id="@+id/password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#ffffff"
+                android:textColor="#009688"
                 android:inputType="textPassword"
                 android:hint="Password"/>
 

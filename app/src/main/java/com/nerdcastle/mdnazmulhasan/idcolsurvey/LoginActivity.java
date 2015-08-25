@@ -56,10 +56,12 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(JSONObject jsonObject) {
                 try {
                     Boolean result=jsonObject.getBoolean("ResultState");
+                    String token=jsonObject.getString("Token");
                     Toast.makeText(getApplicationContext(),jsonObject.toString(), Toast.LENGTH_LONG).show();
                     if(result){
                         Toast.makeText(getApplicationContext(),result.toString(), Toast.LENGTH_LONG).show();
-                        Intent i=new Intent(getApplicationContext(),QuestionActivity.class);
+                        Intent i=new Intent(getApplicationContext(),HomeActivity.class);
+                        i.putExtra("token",token);
                         startActivity(i);
                     }
                     else{
@@ -77,7 +79,7 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), volleyError.toString(), Toast.LENGTH_LONG).show();
             }
         });
-        request.setRetryPolicy(new DefaultRetryPolicy(7000,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        request.setRetryPolicy(new DefaultRetryPolicy(1000,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         AppController.getInstance().addToRequestQueue(request);
 
         Toast.makeText(getApplicationContext(), request.toString(), Toast.LENGTH_LONG).show();

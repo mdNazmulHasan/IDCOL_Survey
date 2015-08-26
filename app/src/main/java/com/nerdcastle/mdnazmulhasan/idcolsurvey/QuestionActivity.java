@@ -8,6 +8,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -45,8 +46,8 @@ public class QuestionActivity extends AppCompatActivity{
     Boolean IsMultipleAnswer;
     ArrayList<JSONObject> answerCollection=new ArrayList<>();
     JSONObject answerobject;
-    Button next;
-    Button prev;
+    ImageButton next;
+    ImageButton prev;
     String token="1234";
     JSONObject tokenNumber;
 
@@ -56,9 +57,9 @@ public class QuestionActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.question);
         mLinearLayout = (LinearLayout) findViewById(R.id.linear1);
-        next= (Button) findViewById(R.id.next);
-        prev= (Button) findViewById(R.id.prev);
-        //token=getIntent().getStringExtra("token");
+        next= (ImageButton) findViewById(R.id.next);
+        prev= (ImageButton) findViewById(R.id.prev);
+        token=getIntent().getStringExtra("token");
 
         showService();
     }
@@ -72,9 +73,9 @@ public class QuestionActivity extends AppCompatActivity{
             checkBox.setTextColor(Color.BLACK);
             final float scale = this.getResources().getDisplayMetrics().density;
             checkBox.setPadding(checkBox.getPaddingLeft() + (int) (10.0f * scale + 0.5f),
-                    checkBox.getPaddingTop(),
-                    checkBox.getPaddingRight(),
-                    checkBox.getPaddingBottom());
+                    checkBox.getPaddingTop()+ (int) (10.0f * scale + 0.5f),
+                    checkBox.getPaddingRight()+ (int) (10.0f * scale + 0.5f),
+                    checkBox.getPaddingBottom()+ (int) (10.0f * scale + 0.5f));
             checkBox.setButtonDrawable(R.drawable.box);
             checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             checkBox.setTypeface(Typeface.DEFAULT_BOLD);
@@ -94,10 +95,10 @@ public class QuestionActivity extends AppCompatActivity{
             radioButtons[i].setButtonDrawable(R.drawable.radio);
             radioButtons[i].setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             final float scale = this.getResources().getDisplayMetrics().density;
-            radioButtons[i].setPadding(radioButtons[i].getPaddingLeft() + (int)(10.0f * scale + 0.5f),
-                    radioButtons[i].getPaddingTop(),
-                    radioButtons[i].getPaddingRight(),
-                    radioButtons[i].getPaddingBottom());
+            radioButtons[i].setPadding(radioButtons[i].getPaddingLeft() + (int) (10.0f * scale + 0.5f),
+                    radioButtons[i].getPaddingTop() + (int) (10.0f * scale + 0.5f),
+                    radioButtons[i].getPaddingRight() + (int) (10.0f * scale + 0.5f),
+                    radioButtons[i].getPaddingBottom() + (int) (10.0f * scale + 0.5f));
             radioButtons[i].setTextColor(Color.BLACK);
             radioButtons[i].setTypeface(Typeface.DEFAULT_BOLD);
             radioButtons[i].setText(answerlist.getJSONObject(i).getString("Description"));
@@ -117,7 +118,7 @@ public class QuestionActivity extends AppCompatActivity{
     }
     private void showService() {
         StringRequest stringrequest = new StringRequest(Request.Method.GET,
-                "http://192.168.1.109/survey/api/questions",
+                "http://dotnet.nerdcastlebd.com/renew/api/questions",
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -165,7 +166,18 @@ public class QuestionActivity extends AppCompatActivity{
     }
 
 
+    public void next(View view) throws JSONException {
+        if(index<sizeOfQuestionBank-1){
+            index++;
+            number=0;
+            showService();
+        }
+        else if(index==(sizeOfQuestionBank-1)){
+            Toast.makeText(getApplicationContext(),"Thats all there is.",Toast.LENGTH_LONG).show();
+        }
+    }
     public void send(View view) throws JSONException {
+
         String selection;
         JSONArray getAnswerArray=new JSONArray();
         tokenNumber=new JSONObject();
@@ -221,24 +233,25 @@ public class QuestionActivity extends AppCompatActivity{
                             //getAnswerArray.put(tokenNumber);
                             System.out.println(getAnswerArray);
                             Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
+                            JsonArrayRequest request=new JsonArrayRequest(Request.Method.POST, "http://192.168.1.109/survey/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
+                                @Override
+                                public void onResponse(JSONArray response) {
+                                    Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
+                                }
+
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                            AppController.getInstance().addToRequestQueue(request);
+                            Toast.makeText(getApplicationContext(),answerCollection.toString(),Toast.LENGTH_LONG).show();
                         }
                     }
 
                 }
-                JsonArrayRequest request=new JsonArrayRequest(Request.Method.POST, "http://192.168.1.109/survey/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
-                    }
 
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG).show();
-                    }
-                });
-                AppController.getInstance().addToRequestQueue(request);
-                Toast.makeText(getApplicationContext(),answerCollection.toString(),Toast.LENGTH_LONG).show();
 
             }
             if(index<sizeOfQuestionBank-1){

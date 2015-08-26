@@ -2,65 +2,86 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:background="#ffffff"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:layout_height="fill_parent">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:id="@+id/question"
-            android:layout_height="wrap_content"
-            android:text="Question is loading......"
-            android:layout_marginTop="20dp"
-            android:textStyle="bold"
-            android:layout_gravity="center_horizontal"
-            android:textSize="20sp"
-            android:textColor="#2196f3" />
-
-        <LinearLayout
-            android:id="@+id/linear1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="20dp"
-            android:layout_gravity="center_horizontal"></LinearLayout>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
         <LinearLayout
             android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:layout_height="wrap_content">
-            <Button
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:text="prev"
-                android:onClick="prev"
-                android:visibility="gone"
-                android:layout_margin="5dp"
-                android:layout_weight="1"
-                android:id="@+id/prev"
-                android:layout_gravity="right"
-                android:textColor="#ffffff"
-                android:background="#03A9F4"/>
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            android:orientation="vertical">
 
-            <Button
-                android:layout_width="0dp"
+            <TextView
+                android:layout_width="wrap_content"
+                android:id="@+id/question"
                 android:layout_height="wrap_content"
-                android:text="next"
-                android:layout_margin="5dp"
-                android:onClick="send"
-                android:layout_weight="1"
-                android:visibility="gone"
-                android:id="@+id/next"
-                android:layout_gravity="right"
-                android:textColor="#ffffff"
-                android:background="#03A9F4"/>
+                android:text="Question is loading......"
+                android:layout_margin="20dp"
+                android:textStyle="bold"
+                android:layout_gravity="center_horizontal"
+                android:textSize="20sp"
+                android:textColor="#2196f3" />
+
+            <LinearLayout
+                android:id="@+id/linear1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="20dp"
+                android:layout_gravity="center_horizontal"></LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:layout_gravity="right">
+
+
+            </LinearLayout>
         </LinearLayout>
-
-
     </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="horizontal"
+        android:layout_marginTop="175dp"
+        android:layout_marginLeft="15dp"
+        android:layout_gravity="bottom"
+        android:layout_marginRight="15dp"
+        android:layout_height="wrap_content">
+        <ImageButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/prev"
+            android:onClick="prev"
+            android:background="#ffffff"
+            android:src="@drawable/prev"/>
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="submit"
+            android:layout_margin="10dp"
+            android:onClick="send"
+            android:layout_weight="3"
+            android:id="@+id/submit"
+            android:layout_gravity="right"
+            android:textColor="#ffffff"
+            android:background="#4caf50"/>
+
+        <ImageButton
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:id="@+id/next"
+            android:onClick="next"
+            android:background="#ffffff"
+            android:src="@drawable/next"/>
+    </LinearLayout>
+
 </LinearLayout>
 
 

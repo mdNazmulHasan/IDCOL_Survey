@@ -28,5 +28,4 @@
         android:layout_gravity="center|center_horizontal"
         android:layout_weight="0.17" />
 
-
 </LinearLayout>

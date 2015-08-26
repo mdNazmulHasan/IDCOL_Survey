@@ -7,22 +7,55 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Toast;
 
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by mdnazmulhasan on 8/16/15.
  */
 public class HomeActivity extends AppCompatActivity {
-    String token;
+    String userId;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_screen);
-        token=getIntent().getStringExtra("token");
-        Toast.makeText(getApplicationContext(),token,Toast.LENGTH_LONG).show();
+        userId=getIntent().getStringExtra("id");
+        Toast.makeText(getApplicationContext(),userId,Toast.LENGTH_LONG).show();
 
     }
-    public void start(View view){
-        Intent i=new Intent(getApplicationContext(),QuestionActivity.class);
-        i.putExtra("token",token);
-        startActivity(i);
+    public void start(View view) throws JSONException {
+        JSONObject id=new JSONObject();
+        id.put("UserId",userId);
+        JsonObjectRequest request=new JsonObjectRequest(Request.Method.POST, "http://192.168.1.109/survey/api/users", id, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    String token=response.getString("Token");
+                    Toast.makeText(getApplicationContext(),token,Toast.LENGTH_LONG).show();
+                    Intent i=new Intent(getApplicationContext(),QuestionActivity.class);
+                    i.putExtra("token",token);
+                    startActivity(i);
+                } catch (JSONException e) {
+                    Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_LONG).show();
+                }
+                Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(),error.toString(),Toast.LENGTH_LONG).show();
+            }
+        });
+        request.setRetryPolicy(new DefaultRetryPolicy(10000,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        AppController.getInstance().addToRequestQueue(request);
+
     }
 }

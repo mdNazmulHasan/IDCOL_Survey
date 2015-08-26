@@ -56,15 +56,16 @@ public class LoginActivity extends AppCompatActivity {
             public void onResponse(JSONObject jsonObject) {
                 try {
                     Boolean result=jsonObject.getBoolean("ResultState");
-                    String token=jsonObject.getString("Token");
-                    Toast.makeText(getApplicationContext(),jsonObject.toString(), Toast.LENGTH_LONG).show();
+                    String userId=jsonObject.getString("Id");
+                    System.out.println(userId);
+                    Toast.makeText(getApplicationContext(),userId, Toast.LENGTH_LONG).show();
                     if(result){
                         Toast.makeText(getApplicationContext(),result.toString(), Toast.LENGTH_LONG).show();
                         Intent i=new Intent(getApplicationContext(),HomeActivity.class);
-                        i.putExtra("token",token);
+                        i.putExtra("id",userId);
                         startActivity(i);
                     }
-                    else{
+                    else if(!result){
                         Toast.makeText(getApplicationContext(),"Incorrect Username or Password", Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {

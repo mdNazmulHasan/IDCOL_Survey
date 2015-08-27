@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -20,6 +19,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 
 import org.json.JSONArray;
@@ -28,14 +28,11 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-public class QuestionActivity extends AppCompatActivity{
+public class QuestionActivity extends AppCompatActivity {
 
     RadioGroup radioGroup;
-    int sizeOfQuestionBank;
-    int index=0;
-    JSONArray jsonArray;
-    JSONObject jsonObject;
-    int number=0;
+    int questionId = 1;
+    int number = 0;
     LinearLayout mLinearLayout;
     String questionFromJson;
     String serialNmbr;
@@ -44,46 +41,62 @@ public class QuestionActivity extends AppCompatActivity{
     TextView question;
     JSONArray answerArray;
     Boolean IsMultipleAnswer;
-    ArrayList<JSONObject> answerCollection=new ArrayList<>();
+    ArrayList<JSONObject> answerCollection = new ArrayList<>();
     JSONObject answerobject;
     ImageButton next;
     ImageButton prev;
-    String token="1234";
-    JSONObject tokenNumber;
-
+    String token;
+    String userId;
+    String questionNumber;
+    int TotalQuestion;
+    JSONArray givenAnswer;
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.question);
         mLinearLayout = (LinearLayout) findViewById(R.id.linear1);
-        next= (ImageButton) findViewById(R.id.next);
-        prev= (ImageButton) findViewById(R.id.prev);
-        token=getIntent().getStringExtra("token");
-
-        showService();
+        next = (ImageButton) findViewById(R.id.next);
+        prev = (ImageButton) findViewById(R.id.prev);
+        token = getIntent().getStringExtra("token");
+        userId = getIntent().getStringExtra("id");
+        questionNumber = getIntent().getStringExtra("questionNumber");
+        TotalQuestion = Integer.parseInt(questionNumber);
+        try {
+            showService();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void createCheckBox(int number,JSONArray answerlist) throws JSONException {
+    private void createCheckBox(int number, JSONArray answerlist, JSONArray givenAnswer) throws JSONException {
         mLinearLayout.removeAllViews();
-
-        for(int i = 0; i < number; i++) {
+        for (int i = 0; i < number; i++) {
             CheckBox checkBox = new CheckBox(getApplicationContext());
             checkBox.setText(answerlist.getJSONObject(i).getString("Description"));
             checkBox.setTextColor(Color.BLACK);
             final float scale = this.getResources().getDisplayMetrics().density;
             checkBox.setPadding(checkBox.getPaddingLeft() + (int) (10.0f * scale + 0.5f),
-                    checkBox.getPaddingTop()+ (int) (10.0f * scale + 0.5f),
-                    checkBox.getPaddingRight()+ (int) (10.0f * scale + 0.5f),
-                    checkBox.getPaddingBottom()+ (int) (10.0f * scale + 0.5f));
+                    checkBox.getPaddingTop() + (int) (10.0f * scale + 0.5f),
+                    checkBox.getPaddingRight() + (int) (10.0f * scale + 0.5f),
+                    checkBox.getPaddingBottom() + (int) (10.0f * scale + 0.5f));
             checkBox.setButtonDrawable(R.drawable.box);
             checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             checkBox.setTypeface(Typeface.DEFAULT_BOLD);
             checkBox.setTag(answerlist.getJSONObject(i));
+            Toast.makeText(getApplicationContext(), "--" + answerlist.getJSONObject(i).getString("Id"), Toast.LENGTH_SHORT).show();
+
             mLinearLayout.addView(checkBox);
+            for (int index = 0; index < givenAnswer.length(); index++) {
+                if (answerlist.getJSONObject(i).getString("Id").equalsIgnoreCase(String.valueOf(givenAnswer.get(index)))) {
+                    checkBox.setChecked(true);
+                }
+            }
+
         }
     }
-    private void createRadioButton(int number, JSONArray answerlist) throws JSONException {
+
+    private void createRadioButton(int number, JSONArray answerlist, JSONArray givenAnswer) throws JSONException {
         mLinearLayout.removeAllViews();
         final RadioButton[] radioButtons = new RadioButton[number];
         radioGroup = new RadioGroup(this);
@@ -102,103 +115,114 @@ public class QuestionActivity extends AppCompatActivity{
             radioButtons[i].setTextColor(Color.BLACK);
             radioButtons[i].setTypeface(Typeface.DEFAULT_BOLD);
             radioButtons[i].setText(answerlist.getJSONObject(i).getString("Description"));
+            Toast.makeText(getApplicationContext(), "--" + answerlist.getJSONObject(i).getString("Id"), Toast.LENGTH_SHORT).show();
+            for (int index = 0; index < givenAnswer.length(); index++) {
+                if (answerlist.getJSONObject(i).getString("Id").equalsIgnoreCase(String.valueOf(givenAnswer.get(index)))) {
+                    radioButtons[i].setChecked(true);
+                }
+            }
+           /* if(answerlist.getJSONObject(i).getString("Id").equalsIgnoreCase(ansId)){
+                Toast.makeText(getApplicationContext(),"ok"+answerlist.getJSONObject(i).getString("Id"),Toast.LENGTH_SHORT).show();
+                radioButtons[i].setChecked(true);
+            }*/
 
         }
 
         mLinearLayout.addView(radioGroup);
     }
-    public void prev(View view){
-        if(index!=0){
-            index--;
+
+    public void prev(View view) throws JSONException {
+        if (questionId != 0) {
+            questionId--;
             showService();
-        }
-        else if(index==0){
-            Toast.makeText(getApplicationContext(),"there is nothing before this", Toast.LENGTH_LONG).show();
+        } else if (questionId == 0) {
+            Toast.makeText(getApplicationContext(), "there is nothing before this", Toast.LENGTH_LONG).show();
         }
     }
-    private void showService() {
-        StringRequest stringrequest = new StringRequest(Request.Method.GET,
-                "http://dotnet.nerdcastlebd.com/renew/api/questions",
-                new Response.Listener<String>() {
+
+    private void showService() throws JSONException {
+        JSONObject dataForValidation = new JSONObject();
+        dataForValidation.put("QuestionId", questionId);
+        dataForValidation.put("Token", token);
+        dataForValidation.put("UserId", userId);
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,
+                "http://dotnet.nerdcastlebd.com/renew/api/home", dataForValidation,
+                new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(String response) {
+                    public void onResponse(JSONObject response) {
+                        System.out.println(response.toString());
                         try {
-                            next.setVisibility(View.VISIBLE);
-                            prev.setVisibility(View.VISIBLE);
-                            jsonArray = new JSONArray(response);
-                            jsonObject = jsonArray.getJSONObject(index);
-                            sizeOfQuestionBank=jsonArray.length();
-                            Toast.makeText(getApplicationContext(), String.valueOf(sizeOfQuestionBank), Toast.LENGTH_LONG).show();
-                            questionFromJson = jsonObject.getString("Description");
-                            serialNmbr=jsonObject.getString("SerialNo");
+                            questionFromJson = response.getString("Description");
+                            serialNmbr = response.getString("SerialNo");
                             question = (TextView) findViewById(R.id.question);
                             question.setText(serialNmbr + ". " + questionFromJson);
-                            numberFromJson = jsonObject.getString("NoOfAnswer");
+                            numberFromJson = response.getString("NoOfAnswer");
                             number = Integer.parseInt(numberFromJson);
                             Toast.makeText(getApplicationContext(), String.valueOf(number), Toast.LENGTH_LONG).show();
-
-                            answerArray = jsonObject.getJSONArray("AnswerList");
-                            isMultiple=jsonObject.getString("IsMultipleAnswer");
-                            IsMultipleAnswer=Boolean.parseBoolean(isMultiple);
-                            if(IsMultipleAnswer){
-                                createCheckBox(number, answerArray);
-                            }
-                            else{
-                                createRadioButton(number, answerArray);
+                            answerArray = response.getJSONArray("AnswerList");
+                            isMultiple = response.getString("IsMultipleAnswer");
+                            givenAnswer = response.getJSONArray("GivenAnswers");
+                            Toast.makeText(getApplicationContext(), givenAnswer.toString(), Toast.LENGTH_LONG).show();
+                            IsMultipleAnswer = Boolean.parseBoolean(isMultiple);
+                            if (IsMultipleAnswer) {
+                                createCheckBox(number, answerArray, givenAnswer);
+                            } else {
+                                createRadioButton(number, answerArray, givenAnswer);
                             }
                         } catch (JSONException e) {
 
                             e.printStackTrace();
                         }
                     }
-
-                }, new Response.ErrorListener() {
+                }
+                , new Response.ErrorListener() {
 
             @Override
-            public void onErrorResponse(VolleyError arg0) {
-
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG).show();
             }
         });
-        stringrequest.setRetryPolicy(new DefaultRetryPolicy(1000,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        request.setRetryPolicy(new DefaultRetryPolicy(1000, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
-        AppController.getInstance().addToRequestQueue(stringrequest);
+        AppController.getInstance().addToRequestQueue(request);
 
     }
 
 
     public void next(View view) throws JSONException {
-        if(index<sizeOfQuestionBank-1){
-            index++;
-            number=0;
+        if (questionId < TotalQuestion) {
+            questionId++;
+            number = 0;
             showService();
-        }
-        else if(index==(sizeOfQuestionBank-1)){
-            Toast.makeText(getApplicationContext(),"Thats all there is.",Toast.LENGTH_LONG).show();
+        } else if (questionId == (TotalQuestion)) {
+            Toast.makeText(getApplicationContext(), "Thats all there is.", Toast.LENGTH_LONG).show();
         }
     }
+
     public void send(View view) throws JSONException {
 
         String selection;
-        JSONArray getAnswerArray=new JSONArray();
-        tokenNumber=new JSONObject();
+        JSONArray getAnswerArray = new JSONArray();
+        /*tokenNumber=new JSONObject();
         tokenNumber.put("Token",token);
-        System.out.println(tokenNumber);
-        Toast.makeText(getApplicationContext(), tokenNumber.toString(), Toast.LENGTH_LONG).show();
-        try{
-            if(!IsMultipleAnswer){
-                if(radioGroup.getCheckedRadioButtonId()!=-1){
-                    int id= radioGroup.getCheckedRadioButtonId();
+        System.out.println(tokenNumber);*/
+//        Toast.makeText(getApplicationContext(), tokenNumber.toString(), Toast.LENGTH_LONG).show();
+        try {
+            if (!IsMultipleAnswer) {
+                if (radioGroup.getCheckedRadioButtonId() != -1) {
+                    int id = radioGroup.getCheckedRadioButtonId();
                     View radioButton = radioGroup.findViewById(id);
                     int radioId = radioGroup.indexOfChild(radioButton);
                     RadioButton btn = (RadioButton) radioGroup.getChildAt(radioId);
-                    answerobject= (JSONObject) btn.getTag();
-                    answerobject.put("Token",token);
+                    answerobject = (JSONObject) btn.getTag();
+                    answerobject.put("Token", token);
+                    answerobject.put("UserId", userId);
                     getAnswerArray.put(answerobject);
-                    getAnswerArray.put(tokenNumber);
+                    //getAnswerArray.put(tokenNumber);
                     System.out.println(getAnswerArray);
                     Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
 
-                    JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://192.168.1.109/survey/api/answers",
+                    JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://dotnet.nerdcastlebd.com/renew/api/answers",
                             getAnswerArray, new Response.Listener<JSONArray>() {
 
                         @Override
@@ -213,27 +237,25 @@ public class QuestionActivity extends AppCompatActivity{
                         }
                     });
                     AppController.getInstance().addToRequestQueue(request);
+                } else {
+                    selection = "select one pls!";
+                    Toast.makeText(getApplicationContext(), selection, Toast.LENGTH_LONG).show();
                 }
-                else{
-                    selection="select one pls!";
-                    Toast.makeText(getApplicationContext(),selection,Toast.LENGTH_LONG).show();
-                }
-            }
-            else if(IsMultipleAnswer){
-                for(int i=0; i<mLinearLayout.getChildCount(); i++) {
+            } else if (IsMultipleAnswer) {
+                for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
 
                     View nextChild = mLinearLayout.getChildAt(i);
-                    if(nextChild instanceof CheckBox)
-                    {
+                    if (nextChild instanceof CheckBox) {
                         CheckBox check = (CheckBox) nextChild;
                         if (check.isChecked()) {
-                            answerobject= (JSONObject) check.getTag();
-                            answerobject.put("Token",token);
+                            answerobject = (JSONObject) check.getTag();
+                            answerobject.put("Token", token);
+                            answerobject.put("UserId", userId);
                             getAnswerArray.put(answerobject);
                             //getAnswerArray.put(tokenNumber);
                             System.out.println(getAnswerArray);
                             Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
-                            JsonArrayRequest request=new JsonArrayRequest(Request.Method.POST, "http://192.168.1.109/survey/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
+                            JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://dotnet.nerdcastlebd.com/renew/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
                                 @Override
                                 public void onResponse(JSONArray response) {
                                     Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
@@ -246,7 +268,7 @@ public class QuestionActivity extends AppCompatActivity{
                                 }
                             });
                             AppController.getInstance().addToRequestQueue(request);
-                            Toast.makeText(getApplicationContext(),answerCollection.toString(),Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(), answerCollection.toString(), Toast.LENGTH_LONG).show();
                         }
                     }
 
@@ -254,17 +276,16 @@ public class QuestionActivity extends AppCompatActivity{
 
 
             }
-            if(index<sizeOfQuestionBank-1){
-                index++;
-                number=0;
+            if (questionId < TotalQuestion) {
+                questionId++;
+                number = 0;
                 showService();
-            }
-            else if(index==(sizeOfQuestionBank-1)){
-                Toast.makeText(getApplicationContext(),"Thats all there is.",Toast.LENGTH_LONG).show();
+            } else if (questionId == (TotalQuestion)) {
+                Toast.makeText(getApplicationContext(), "Thats all there is.", Toast.LENGTH_LONG).show();
             }
 
-        }catch (Exception e){
-            Toast.makeText(getApplicationContext(),"Check your internet connection",Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+            Toast.makeText(getApplicationContext(), "Check your internet connection", Toast.LENGTH_LONG).show();
         }
     }
 }

@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         JSONObject requestJsonObject=new JSONObject();
         requestJsonObject.put("Name",username);
         requestJsonObject.put("Password",password);
-        String url = "http://192.168.1.109/survey/api/publics";
+        String url = "http://dotnet.nerdcastlebd.com/renew/api/publics";
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,url,
                 requestJsonObject, new Response.Listener<JSONObject>() {
 

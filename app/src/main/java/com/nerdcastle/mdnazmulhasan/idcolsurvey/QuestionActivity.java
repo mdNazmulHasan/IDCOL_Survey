@@ -129,12 +129,127 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     public void prev(View view) throws JSONException {
+
         if (questionId != 0) {
+            if (IsMultipleAnswer) {
+                for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
+
+                    View nextChild = mLinearLayout.getChildAt(i);
+                    if (nextChild instanceof CheckBox) {
+                        CheckBox check = (CheckBox) nextChild;
+                        if (check.isChecked()) {
+                            isAnswerChecked = true;
+                        }
+                    }
+                }
+
+                if (isAnswerChecked) {
+
+                    AlertDialog alertDialog = new AlertDialog.Builder(QuestionActivity.this).create();
+                    alertDialog.setTitle("Submit");
+                    alertDialog.setMessage("Would you like to submit?");
+                    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    answerSubmit();
+
+                                    /*questionId++;
+
+                                    try {
+                                        showService();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }*/
+                                    dialog.dismiss();
+                                    isAnswerChecked = false;
+                                }
+                            });
+                    alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    questionId--;
+                                    try {
+                                        showService();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    dialog.dismiss();
+                                    isAnswerChecked = false;
+                                }
+                            });
+                    alertDialog.show();
+                } else {
+
+                    questionId++;
+                    try {
+                        showService();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            else{
+                if (radioGroup.getCheckedRadioButtonId() != -1) {
+
+                    AlertDialog alertDialog = new AlertDialog.Builder(QuestionActivity.this).create();
+                    alertDialog.setTitle("Submit");
+                    alertDialog.setMessage("Would you like to submit?");
+                    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    answerSubmit();
+/*
+                                    questionId++;
+
+                                    try {
+                                        showService();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }*/
+                                    dialog.dismiss();
+                                    isAnswerChecked = false;
+                                }
+                            });
+                    alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    questionId--;
+                                    try {
+                                        showService();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    dialog.dismiss();
+                                    isAnswerChecked = false;
+                                }
+                            });
+                    alertDialog.show();
+                } else {
+
+                    questionId--;
+                    try {
+                        showService();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+        else if (questionId == 0) {
+            Toast.makeText(getApplicationContext(), "there is nothing before this", Toast.LENGTH_LONG).show();
+        }
+       /* if (questionId != 0) {
             questionId--;
             showService();
         } else if (questionId == 0) {
             Toast.makeText(getApplicationContext(), "there is nothing before this", Toast.LENGTH_LONG).show();
-        }
+        }*/
     }
 
     private void showService() throws JSONException {
@@ -208,14 +323,15 @@ public class QuestionActivity extends AppCompatActivity {
                     alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int which) {
+                                    answerSubmit();
 
-                                    questionId++;
+                                    /*questionId++;
 
                                     try {
                                         showService();
                                     } catch (JSONException e) {
                                         e.printStackTrace();
-                                    }
+                                    }*/
                                     dialog.dismiss();
                                     isAnswerChecked = false;
                                 }
@@ -245,11 +361,49 @@ public class QuestionActivity extends AppCompatActivity {
                 }
             }
             else{
-                questionId++;
-                try {
-                    showService();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                if (radioGroup.getCheckedRadioButtonId() != -1) {
+
+                    AlertDialog alertDialog = new AlertDialog.Builder(QuestionActivity.this).create();
+                    alertDialog.setTitle("Submit");
+                    alertDialog.setMessage("Would you like to submit?");
+                    alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "YES",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    answerSubmit();
+/*
+                                    questionId++;
+
+                                    try {
+                                        showService();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }*/
+                                    dialog.dismiss();
+                                    isAnswerChecked = false;
+                                }
+                            });
+                    alertDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "No",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    questionId++;
+                                    try {
+                                        showService();
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    dialog.dismiss();
+                                    isAnswerChecked = false;
+                                }
+                            });
+                    alertDialog.show();
+                } else {
+
+                    questionId++;
+                    try {
+                        showService();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -266,6 +420,10 @@ public class QuestionActivity extends AppCompatActivity {
 
     public void send(View view) throws JSONException {
 
+        answerSubmit();
+    }
+
+    private void answerSubmit() {
         String selection;
         JSONArray getAnswerArray = new JSONArray();
         try {
@@ -279,7 +437,6 @@ public class QuestionActivity extends AppCompatActivity {
                     answerobject.put("Token", token);
                     answerobject.put("UserId", userId);
                     getAnswerArray.put(answerobject);
-                    //getAnswerArray.put(tokenNumber);
                     System.out.println(getAnswerArray);
                     Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
 

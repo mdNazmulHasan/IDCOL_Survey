@@ -192,10 +192,7 @@ public class QuestionActivity extends AppCompatActivity {
     public void next(View view) throws JSONException {
         if (questionId < TotalQuestion) {
             if (IsMultipleAnswer) {
-
                     checkChange();
-
-
                 if(changed){
                     userSubmitionRequestForMultipleChoice();
                 }
@@ -209,9 +206,9 @@ public class QuestionActivity extends AppCompatActivity {
                     isAnswerChecked = false;
                 }
 
-            } else {
-                if (radioGroup.getCheckedRadioButtonId() != -1) {
-
+            } else if(!IsMultipleAnswer){
+                checkChange();
+                if(changed){
                     userSubmissionRequest();
                 } else {
 
@@ -252,6 +249,31 @@ public class QuestionActivity extends AppCompatActivity {
                 }
 
             }
+
+        }
+        else if(!IsMultipleAnswer) {
+            int optionId = 0;
+            if (radioGroup.getCheckedRadioButtonId() != -1) {
+                int id = radioGroup.getCheckedRadioButtonId();
+                View radioButton = radioGroup.findViewById(id);
+                int radioId = radioGroup.indexOfChild(radioButton);
+                RadioButton btn = (RadioButton) radioGroup.getChildAt(radioId);
+                answerobject = (JSONObject) btn.getTag();
+                optionId = Integer.parseInt(answerobject.getString("Id"));
+                checkedOption.put(optionId);
+            }
+
+            if(givenAnswer!=null){
+                if(givenAnswer.toString().equals(checkedOption.toString())){
+                    changed=false;
+                }
+                else{
+                    changed=true;
+                }
+
+            }
+
+
 
         }
 

@@ -52,6 +52,8 @@ public class QuestionActivity extends AppCompatActivity {
     String questionNumber;
     int TotalQuestion;
     JSONArray givenAnswer;
+    boolean changed=false;
+    CheckBox check;
 
 
     public void onCreate(Bundle savedInstanceState) {
@@ -86,7 +88,7 @@ public class QuestionActivity extends AppCompatActivity {
             checkBox.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
             checkBox.setTypeface(Typeface.DEFAULT_BOLD);
             checkBox.setTag(answerlist.getJSONObject(i));
-            Toast.makeText(getApplicationContext(), "--" + answerlist.getJSONObject(i).getString("Id"), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "--" + answerlist.getJSONObject(i).getString("Id"), Toast.LENGTH_SHORT).show();
 
             mLinearLayout.addView(checkBox);
             for (int index = 0; index < givenAnswer.length(); index++) {
@@ -190,7 +192,23 @@ public class QuestionActivity extends AppCompatActivity {
     public void next(View view) throws JSONException {
         if (questionId < TotalQuestion) {
             if (IsMultipleAnswer) {
-                userSubmitionRequestForMultipleChoice();
+
+                    checkChange();
+
+
+                if(changed){
+                    userSubmitionRequestForMultipleChoice();
+                }
+                else{
+                    questionId++;
+                    try {
+                        showService();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    isAnswerChecked = false;
+                }
+
             } else {
                 if (radioGroup.getCheckedRadioButtonId() != -1) {
 
@@ -208,6 +226,36 @@ public class QuestionActivity extends AppCompatActivity {
         } else if (questionId == (TotalQuestion)) {
             Toast.makeText(getApplicationContext(), "Thats all there is.", Toast.LENGTH_LONG).show();
         }
+    }
+
+    private boolean checkChange() throws JSONException {
+        JSONArray checkedOption=new JSONArray();
+        if(IsMultipleAnswer) {
+            for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
+
+                View nextChild = mLinearLayout.getChildAt(i);
+                if (nextChild instanceof CheckBox) {
+                    check = (CheckBox) nextChild;
+                    if (check.isChecked()) {
+                        answerobject = (JSONObject) check.getTag();
+                        int optionId= Integer.parseInt(answerobject.getString("Id"));
+                        checkedOption.put(optionId);
+                    }
+                }
+            }
+            if(givenAnswer!=null){
+                if(givenAnswer.toString().equals(checkedOption.toString())){
+                    changed=false;
+                }
+                else{
+                    changed=true;
+                }
+
+            }
+
+        }
+
+        return changed;
     }
 
     private void userSubmitionRequestForMultipleChoice() {
@@ -311,7 +359,7 @@ public class QuestionActivity extends AppCompatActivity {
 
                     View nextChild = mLinearLayout.getChildAt(i);
                     if (nextChild instanceof CheckBox) {
-                        CheckBox check = (CheckBox) nextChild;
+                        check = (CheckBox) nextChild;
                         if (check.isChecked()) {
                             answerobject = (JSONObject) check.getTag();
                             answerobject.put("Token", token);

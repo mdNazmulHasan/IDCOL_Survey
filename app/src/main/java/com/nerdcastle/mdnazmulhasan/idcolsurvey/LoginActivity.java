@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -58,9 +59,9 @@ public class LoginActivity extends AppCompatActivity {
                     Boolean result=jsonObject.getBoolean("ResultState");
                     String userId=jsonObject.getString("Id");
                     System.out.println(userId);
-                    Toast.makeText(getApplicationContext(),userId, Toast.LENGTH_LONG).show();
+                   // Toast.makeText(getApplicationContext(),userId, Toast.LENGTH_LONG).show();
                     if(result){
-                        Toast.makeText(getApplicationContext(),result.toString(), Toast.LENGTH_LONG).show();
+                        //Toast.makeText(getApplicationContext(),result.toString(), Toast.LENGTH_LONG).show();
                         Intent i=new Intent(getApplicationContext(),HomeActivity.class);
                         i.putExtra("id",userId);
                         startActivity(i);
@@ -77,12 +78,15 @@ public class LoginActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(getApplicationContext(), volleyError.toString(), Toast.LENGTH_LONG).show();
+                if(volleyError instanceof NoConnectionError) {
+                    String msg = "No internet Access, Check your internet connection.";
+                    Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                }
             }
         });
-        request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS,DefaultRetryPolicy.DEFAULT_MAX_RETRIES,DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+        request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         AppController.getInstance().addToRequestQueue(request);
 
-        Toast.makeText(getApplicationContext(), request.toString(), Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(), request.toString(), Toast.LENGTH_LONG).show();
     }
 }

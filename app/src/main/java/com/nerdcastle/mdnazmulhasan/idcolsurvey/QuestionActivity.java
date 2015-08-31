@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -26,8 +27,6 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.util.ArrayList;
 
 public class QuestionActivity extends AppCompatActivity {
 
@@ -43,7 +42,7 @@ public class QuestionActivity extends AppCompatActivity {
     TextView question;
     JSONArray answerArray;
     Boolean IsMultipleAnswer;
-    ArrayList<JSONObject> answerCollection = new ArrayList<>();
+    //ArrayList<JSONObject> answerCollection = new ArrayList<>();
     JSONObject answerobject;
     ImageButton next;
     ImageButton prev;
@@ -119,7 +118,7 @@ public class QuestionActivity extends AppCompatActivity {
             radioButtons[i].setTextColor(Color.BLACK);
             radioButtons[i].setTypeface(Typeface.DEFAULT_BOLD);
             radioButtons[i].setText(answerlist.getJSONObject(i).getString("Description"));
-            Toast.makeText(getApplicationContext(), "--" + answerlist.getJSONObject(i).getString("Id"), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "--" + answerlist.getJSONObject(i).getString("Id"), Toast.LENGTH_SHORT).show();
             for (int index = 0; index < givenAnswer.length(); index++) {
                 if (answerlist.getJSONObject(i).getString("Id").equalsIgnoreCase(String.valueOf(givenAnswer.get(index)))) {
                     radioButtons[i].setChecked(true);
@@ -158,11 +157,11 @@ public class QuestionActivity extends AppCompatActivity {
                             question.setText(serialNmbr + ". " + questionFromJson);
                             numberFromJson = response.getString("NoOfAnswer");
                             number = Integer.parseInt(numberFromJson);
-                            Toast.makeText(getApplicationContext(), String.valueOf(number), Toast.LENGTH_LONG).show();
+                           // Toast.makeText(getApplicationContext(), String.valueOf(number), Toast.LENGTH_LONG).show();
                             answerArray = response.getJSONArray("AnswerList");
                             isMultiple = response.getString("IsMultipleAnswer");
                             givenAnswer = response.getJSONArray("GivenAnswers");
-                            Toast.makeText(getApplicationContext(), givenAnswer.toString(), Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getApplicationContext(), givenAnswer.toString(), Toast.LENGTH_LONG).show();
                             IsMultipleAnswer = Boolean.parseBoolean(isMultiple);
                             if (IsMultipleAnswer) {
                                 createCheckBox(number, answerArray, givenAnswer);
@@ -179,7 +178,10 @@ public class QuestionActivity extends AppCompatActivity {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG).show();
+                if(error instanceof NoConnectionError) {
+                String msg = "No internet Access, Check your internet connection.";
+                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+            }
             }
         });
         request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
@@ -354,20 +356,23 @@ public class QuestionActivity extends AppCompatActivity {
                     answerobject.put("UserId", userId);
                     getAnswerArray.put(answerobject);
                     System.out.println(getAnswerArray);
-                    Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
 
                     JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://dotnet.nerdcastlebd.com/renew/api/answers",
                             getAnswerArray, new Response.Listener<JSONArray>() {
 
                         @Override
                         public void onResponse(JSONArray response) {
-                            Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
                         }
 
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError volleyError) {
-                            Toast.makeText(getApplicationContext(), volleyError.toString(), Toast.LENGTH_LONG).show();
+                            if(volleyError instanceof NoConnectionError) {
+                                String msg = "No internet Access, Check your internet connection.";
+                                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                            }
                         }
                     });
                     request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
@@ -377,6 +382,7 @@ public class QuestionActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), selection, Toast.LENGTH_LONG).show();
                 }
             } else if (IsMultipleAnswer) {
+
                 for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
 
                     View nextChild = mLinearLayout.getChildAt(i);
@@ -389,22 +395,25 @@ public class QuestionActivity extends AppCompatActivity {
                             getAnswerArray.put(answerobject);
                             //getAnswerArray.put(tokenNumber);
                             System.out.println(getAnswerArray);
-                            Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
                             JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://dotnet.nerdcastlebd.com/renew/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
                                 @Override
                                 public void onResponse(JSONArray response) {
-                                    Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
+                                    //Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
                                 }
 
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG).show();
+                                    if(error instanceof NoConnectionError) {
+                                        String msg = "No internet Access, Check your internet connection.";
+                                        Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                                    }
                                 }
                             });
                             request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                             AppController.getInstance().addToRequestQueue(request);
-                            Toast.makeText(getApplicationContext(), answerCollection.toString(), Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getApplicationContext(), answerCollection.toString(), Toast.LENGTH_LONG).show();
                         }
                     }
 

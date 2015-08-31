@@ -2,12 +2,14 @@ package com.nerdcastle.mdnazmulhasan.idcolsurvey;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -44,8 +46,8 @@ public class QuestionActivity extends AppCompatActivity {
     Boolean IsMultipleAnswer;
     //ArrayList<JSONObject> answerCollection = new ArrayList<>();
     JSONObject answerobject;
-    ImageButton next;
-    ImageButton prev;
+    ImageButton nextButton;
+    ImageButton prevButton;
     String token;
     String userId;
     String questionNumber;
@@ -53,14 +55,17 @@ public class QuestionActivity extends AppCompatActivity {
     JSONArray givenAnswer;
     boolean changed=false;
     CheckBox check;
+    Button submit;
+
 
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.question);
         mLinearLayout = (LinearLayout) findViewById(R.id.linear1);
-        next = (ImageButton) findViewById(R.id.next);
-        prev = (ImageButton) findViewById(R.id.prev);
+        nextButton = (ImageButton) findViewById(R.id.next);
+        prevButton = (ImageButton) findViewById(R.id.prev);
+        submit= (Button) findViewById(R.id.submit);
         token = getIntent().getStringExtra("token");
         userId = getIntent().getStringExtra("id");
         questionNumber = getIntent().getStringExtra("questionNumber");
@@ -149,8 +154,15 @@ public class QuestionActivity extends AppCompatActivity {
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
+                        nextButton.setVisibility(View.VISIBLE);
+                        prevButton.setVisibility(View.VISIBLE);
+                        submit.setVisibility(View.VISIBLE);
                         System.out.println(response.toString());
                         try {
+                            if(questionId == TotalQuestion) {
+                                submit.setText("Finish");
+                            }
+
                             questionFromJson = response.getString("Description");
                             serialNmbr = response.getString("SerialNo");
                             question = (TextView) findViewById(R.id.question);
@@ -423,8 +435,10 @@ public class QuestionActivity extends AppCompatActivity {
                 questionId++;
                 number = 0;
                 showService();
-            } else if (questionId == (TotalQuestion)) {
-                Toast.makeText(getApplicationContext(), "Thats all there is.", Toast.LENGTH_LONG).show();
+            } else if(questionId == TotalQuestion){
+                Intent i=new Intent(getApplicationContext(),HomeActivity.class);
+                i.putExtra("id",userId);
+                startActivity(i);
             }
 
         } catch (Exception e) {

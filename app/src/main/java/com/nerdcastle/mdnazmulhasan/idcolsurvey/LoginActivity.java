@@ -78,6 +78,7 @@ public class LoginActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
+                Toast.makeText(getApplicationContext(),volleyError.toString(),Toast.LENGTH_LONG).show();
                 if(volleyError instanceof NoConnectionError) {
                     String msg = "No internet Access, Check your internet connection.";
                     Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();

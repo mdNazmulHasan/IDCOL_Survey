@@ -11,6 +11,7 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -40,10 +41,12 @@ public class QuestionActivity extends AppCompatActivity {
     String questionFromJson;
     String serialNmbr;
     String isMultiple;
+    String isEditable;
     String numberFromJson;
     TextView question;
     JSONArray answerArray;
     Boolean IsMultipleAnswer;
+    Boolean IsEditable;
     //ArrayList<JSONObject> answerCollection = new ArrayList<>();
     JSONObject answerobject;
     ImageButton nextButton;
@@ -69,6 +72,7 @@ public class QuestionActivity extends AppCompatActivity {
         token = getIntent().getStringExtra("token");
         userId = getIntent().getStringExtra("id");
         questionNumber = getIntent().getStringExtra("questionNumber");
+        Toast.makeText(getApplicationContext(),questionNumber, Toast.LENGTH_LONG).show();
         TotalQuestion = Integer.parseInt(questionNumber);
         try {
             showService();
@@ -138,6 +142,9 @@ public class QuestionActivity extends AppCompatActivity {
     public void prev(View view) throws JSONException {
         if (questionId != 0) {
             questionId--;
+            if(questionId<TotalQuestion){
+                submit.setText("Submit");
+            }
             showService();
         } else if (questionId == 0) {
             Toast.makeText(getApplicationContext(), "there is nothing before this", Toast.LENGTH_LONG).show();
@@ -149,6 +156,7 @@ public class QuestionActivity extends AppCompatActivity {
         dataForValidation.put("QuestionId", questionId);
         dataForValidation.put("Token", token);
         dataForValidation.put("UserId", userId);
+        Toast.makeText(getApplicationContext(),dataForValidation.toString(), Toast.LENGTH_LONG).show();
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,
                 "http://dotnet.nerdcastlebd.com/renew/api/home", dataForValidation,
                 new Response.Listener<JSONObject>() {
@@ -162,6 +170,9 @@ public class QuestionActivity extends AppCompatActivity {
                             if(questionId == TotalQuestion) {
                                 submit.setText("Finish");
                             }
+                            /*else if(questionId<TotalQuestion){
+                                submit.setText("Submit");
+                            }*/
 
                             questionFromJson = response.getString("Description");
                             serialNmbr = response.getString("SerialNo");
@@ -172,12 +183,16 @@ public class QuestionActivity extends AppCompatActivity {
                            // Toast.makeText(getApplicationContext(), String.valueOf(number), Toast.LENGTH_LONG).show();
                             answerArray = response.getJSONArray("AnswerList");
                             isMultiple = response.getString("IsMultipleAnswer");
+                            isEditable=response.getString("IsEditable");
                             givenAnswer = response.getJSONArray("GivenAnswers");
                             //Toast.makeText(getApplicationContext(), givenAnswer.toString(), Toast.LENGTH_LONG).show();
                             IsMultipleAnswer = Boolean.parseBoolean(isMultiple);
+                            IsEditable=Boolean.parseBoolean(isEditable);
                             if (IsMultipleAnswer) {
                                 createCheckBox(number, answerArray, givenAnswer);
-                            } else {
+                            } else if(IsEditable){
+                                createEditText();
+                            }else {
                                 createRadioButton(number, answerArray, givenAnswer);
                             }
                         } catch (JSONException e) {
@@ -190,6 +205,7 @@ public class QuestionActivity extends AppCompatActivity {
 
             @Override
             public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(),error.toString(),Toast.LENGTH_LONG).show();
                 if(error instanceof NoConnectionError) {
                 String msg = "No internet Access, Check your internet connection.";
                 Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
@@ -202,9 +218,17 @@ public class QuestionActivity extends AppCompatActivity {
 
     }
 
+    private void createEditText() {
+        mLinearLayout.removeAllViews();
+        EditText editText=new EditText(getApplicationContext());
+        editText.setTextColor(Color.BLACK);
+        editText.setBackgroundColor(Color.CYAN);
+        mLinearLayout.addView(editText);
+    }
+
 
     public void next(View view) throws JSONException {
-        if (questionId < TotalQuestion) {
+        if (questionId <=TotalQuestion) {
             if (IsMultipleAnswer) {
                     checkChange();
                 if(changed){
@@ -212,6 +236,7 @@ public class QuestionActivity extends AppCompatActivity {
                 }
                 else{
                     questionId++;
+
                     try {
                         showService();
                     } catch (JSONException e) {
@@ -220,7 +245,16 @@ public class QuestionActivity extends AppCompatActivity {
                     isAnswerChecked = false;
                 }
 
-            } else if(!IsMultipleAnswer){
+            }else if(IsEditable){
+                questionId++;
+                try {
+                    showService();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            else if(!IsMultipleAnswer){
                 checkChange();
                 if(changed){
                     userSubmissionRequest();
@@ -234,8 +268,10 @@ public class QuestionActivity extends AppCompatActivity {
                     }
                 }
             }
+
         } else if (questionId == (TotalQuestion)) {
             Toast.makeText(getApplicationContext(), "Thats all there is.", Toast.LENGTH_LONG).show();
+            submit.setText("Finish");
         }
     }
 

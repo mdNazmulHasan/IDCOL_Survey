@@ -65,6 +65,7 @@ public class QuestionActivity extends AppCompatActivity {
     Button submit;
     EditText editText;
     String inputValue;
+    Boolean timeOut=false;
     // List<EditText> allEds = new ArrayList<EditText>();
 
 
@@ -447,6 +448,7 @@ public class QuestionActivity extends AppCompatActivity {
                     public void onErrorResponse(VolleyError error) {
                         if(error instanceof TimeoutError) {
                             String msg = "Request Timed Out, Pls try again";
+                            timeOut=true;
                             Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
                         }
                         else if(error instanceof NoConnectionError) {
@@ -545,9 +547,12 @@ public class QuestionActivity extends AppCompatActivity {
 
 
             if (questionId < TotalQuestion) {
-                questionId++;
-                number = 0;
-                showService();
+                if(!timeOut){
+                    questionId++;
+                    number = 0;
+                    showService();
+                }
+
             } else if (questionId == TotalQuestion) {
                 Intent i = new Intent(getApplicationContext(), HomeActivity.class);
                 i.putExtra("id", userId);

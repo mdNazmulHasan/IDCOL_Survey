@@ -26,4 +26,5 @@ dependencies {
     compile 'com.android.support:design:22.2.0'
     compile 'com.jakewharton:butterknife:6.1.0'
     compile 'com.mcxiaoke.volley:library:1.0.+'
+    compile 'info.hoang8f:fbutton:1.0.5'
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fbutton="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:background="#ffffff"
     android:orientation="vertical"
@@ -62,7 +63,7 @@
             android:onClick="prev"
             android:background="#ffffff"
             android:src="@drawable/prev"/>
-        <Button
+        <info.hoang8f.widget.FButton
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="submit"
@@ -73,7 +74,12 @@
             android:id="@+id/submit"
             android:layout_gravity="right"
             android:textColor="#ffffff"
-            android:background="#4caf50"/>
+            fbutton:buttonColor="@color/fbutton_color_turquoise"
+            fbutton:shadowColor="@color/fbutton_color_green_sea"
+            fbutton:shadowEnabled="true"
+            fbutton:shadowHeight="5dp"
+            fbutton:cornerRadius="5dp"
+        />
 
         <ImageButton
             android:layout_width="0dp"

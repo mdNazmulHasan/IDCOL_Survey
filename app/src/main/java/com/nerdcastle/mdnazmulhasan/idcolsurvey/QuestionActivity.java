@@ -1,6 +1,7 @@
 package com.nerdcastle.mdnazmulhasan.idcolsurvey;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -8,7 +9,9 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.TypedValue;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -66,6 +69,8 @@ public class QuestionActivity extends AppCompatActivity {
     EditText editText;
     String inputValue;
     Boolean timeOut=false;
+    String valueAvailable;
+    String valueToBeChecked;
     // List<EditText> allEds = new ArrayList<EditText>();
 
 
@@ -301,18 +306,21 @@ public class QuestionActivity extends AppCompatActivity {
     private boolean checkChange() throws JSONException {
         JSONArray checkedOption = new JSONArray();
         if (IsEditable) {
-            inputValue=editText.getText().toString();
+            valueAvailable=editText.getText().toString();
+            if(valueAvailable.length()>0){
+                valueToBeChecked=editText.getText().toString();
+                changed=true;
+            }
             if (givenAnswer.length()!=0) {
                 String submittedAnswer=givenAnswer.getJSONObject(0).getString("Description");
                 Toast.makeText(getApplicationContext(),submittedAnswer, Toast.LENGTH_LONG).show();
-                if (submittedAnswer==inputValue) {
+                if (submittedAnswer.equalsIgnoreCase(valueToBeChecked)) {
                     changed = false;
                 } else {
                     changed = true;
                 }
 
             }
-
 
         }
         else if (IsMultipleAnswer) {
@@ -562,5 +570,12 @@ public class QuestionActivity extends AppCompatActivity {
         } catch (Exception e) {
             Toast.makeText(getApplicationContext(), "Check your internet connection", Toast.LENGTH_LONG).show();
         }
+    }
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        InputMethodManager imm = (InputMethodManager)getSystemService(Context.
+                INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        return true;
     }
 }

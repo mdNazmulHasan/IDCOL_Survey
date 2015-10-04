@@ -23,6 +23,7 @@ import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.NoConnectionError;
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -77,7 +78,7 @@ public class QuestionActivity extends AppCompatActivity {
         token = getIntent().getStringExtra("token");
         userId = getIntent().getStringExtra("id");
         questionNumber = getIntent().getStringExtra("questionNumber");
-        Toast.makeText(getApplicationContext(), questionNumber, Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(), questionNumber, Toast.LENGTH_LONG).show();
         TotalQuestion = Integer.parseInt(questionNumber);
         try {
             showService();
@@ -161,7 +162,7 @@ public class QuestionActivity extends AppCompatActivity {
         dataForValidation.put("QuestionId", questionId);
         dataForValidation.put("Token", token);
         dataForValidation.put("UserId", userId);
-        Toast.makeText(getApplicationContext(), dataForValidation.toString(), Toast.LENGTH_LONG).show();
+        //Toast.makeText(getApplicationContext(), dataForValidation.toString(), Toast.LENGTH_LONG).show();
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,
                 "http://dotnet.nerdcastlebd.com/renew/api/home", dataForValidation,
                 new Response.Listener<JSONObject>() {
@@ -170,7 +171,7 @@ public class QuestionActivity extends AppCompatActivity {
                         nextButton.setVisibility(View.VISIBLE);
                         prevButton.setVisibility(View.VISIBLE);
                         submit.setVisibility(View.VISIBLE);
-                        Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
+                        //Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
                         System.out.println(response.toString());
                         try {
                             if (questionId == TotalQuestion) {
@@ -211,10 +212,13 @@ public class QuestionActivity extends AppCompatActivity {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG).show();
-                if (error instanceof NoConnectionError) {
+                if(error instanceof TimeoutError) {
+                    String msg = "Request Timed Out, Pls try again";
+                    Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                }
+                else if(error instanceof NoConnectionError) {
                     String msg = "No internet Access, Check your internet connection.";
-                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -235,7 +239,7 @@ public class QuestionActivity extends AppCompatActivity {
         mLinearLayout.addView(editText);
         if (givenAnswer.length()!=0) {
             String submittedValue=givenAnswer.getJSONObject(0).getString("Description");
-            Toast.makeText(getApplicationContext(), submittedValue, Toast.LENGTH_LONG).show();
+            //Toast.makeText(getApplicationContext(), submittedValue, Toast.LENGTH_LONG).show();
             editText.setText(submittedValue);
         }
     }
@@ -295,7 +299,22 @@ public class QuestionActivity extends AppCompatActivity {
 
     private boolean checkChange() throws JSONException {
         JSONArray checkedOption = new JSONArray();
-        if (IsMultipleAnswer) {
+        if (IsEditable) {
+            inputValue=editText.getText().toString();
+            if (givenAnswer.length()!=0) {
+                String submittedAnswer=givenAnswer.getJSONObject(0).getString("Description");
+                Toast.makeText(getApplicationContext(),submittedAnswer, Toast.LENGTH_LONG).show();
+                if (submittedAnswer==inputValue) {
+                    changed = false;
+                } else {
+                    changed = true;
+                }
+
+            }
+
+
+        }
+        else if (IsMultipleAnswer) {
             for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
 
                 View nextChild = mLinearLayout.getChildAt(i);
@@ -316,23 +335,6 @@ public class QuestionActivity extends AppCompatActivity {
                 }
 
             }
-
-        }else if (IsEditable) {
-            String input=editText.getText().toString();
-            if (!input.matches("")) {
-                inputValue=editText.getText().toString();
-            }
-
-            if (givenAnswer.length()!=0) {
-                String submittedAnswer=givenAnswer.getJSONObject(0).getString("Description");
-                if (submittedAnswer.equals(inputValue)) {
-                    changed = false;
-                } else {
-                    changed = true;
-                }
-
-            }
-
 
         }
         else if (!IsMultipleAnswer) {
@@ -443,9 +445,13 @@ public class QuestionActivity extends AppCompatActivity {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if (error instanceof NoConnectionError) {
+                        if(error instanceof TimeoutError) {
+                            String msg = "Request Timed Out, Pls try again";
+                            Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                        }
+                        else if(error instanceof NoConnectionError) {
                             String msg = "No internet Access, Check your internet connection.";
-                            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                            Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -478,9 +484,13 @@ public class QuestionActivity extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError volleyError) {
-                            if (volleyError instanceof NoConnectionError) {
+                            if(volleyError instanceof TimeoutError) {
+                                String msg = "Request Timed Out, Pls try again";
+                                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                            }
+                            else if(volleyError instanceof NoConnectionError) {
                                 String msg = "No internet Access, Check your internet connection.";
-                                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
                             }
                         }
                     });
@@ -514,9 +524,13 @@ public class QuestionActivity extends AppCompatActivity {
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    if (error instanceof NoConnectionError) {
+                                    if(error instanceof TimeoutError) {
+                                        String msg = "Request Timed Out, Pls try again";
+                                        Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                                    }
+                                    else if(error instanceof NoConnectionError) {
                                         String msg = "No internet Access, Check your internet connection.";
-                                        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                                        Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
                                     }
                                 }
                             });

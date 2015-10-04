@@ -16,6 +16,16 @@
         android:textSize="60sp"
         android:textStyle="bold"
         android:typeface="monospace"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="RE Survey"
+        android:layout_gravity="center"
+        android:layout_marginTop="10dp"
+        android:textColor="#607d8b"
+        android:textSize="60sp"
+        android:textStyle="bold"
+        android:typeface="monospace"/>
 
     <at.markushi.ui.CircleButton
         android:layout_width="148dp"

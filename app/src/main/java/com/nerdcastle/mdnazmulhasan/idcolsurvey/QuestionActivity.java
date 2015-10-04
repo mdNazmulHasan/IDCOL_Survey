@@ -31,6 +31,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class QuestionActivity extends AppCompatActivity {
 
     RadioGroup radioGroup;
@@ -56,10 +59,12 @@ public class QuestionActivity extends AppCompatActivity {
     String questionNumber;
     int TotalQuestion;
     JSONArray givenAnswer;
-    boolean changed=false;
+    boolean changed = false;
     CheckBox check;
     Button submit;
-
+    EditText editText;
+    String inputValue;
+    // List<EditText> allEds = new ArrayList<EditText>();
 
 
     public void onCreate(Bundle savedInstanceState) {
@@ -68,11 +73,11 @@ public class QuestionActivity extends AppCompatActivity {
         mLinearLayout = (LinearLayout) findViewById(R.id.linear1);
         nextButton = (ImageButton) findViewById(R.id.next);
         prevButton = (ImageButton) findViewById(R.id.prev);
-        submit= (Button) findViewById(R.id.submit);
+        submit = (Button) findViewById(R.id.submit);
         token = getIntent().getStringExtra("token");
         userId = getIntent().getStringExtra("id");
         questionNumber = getIntent().getStringExtra("questionNumber");
-        Toast.makeText(getApplicationContext(),questionNumber, Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), questionNumber, Toast.LENGTH_LONG).show();
         TotalQuestion = Integer.parseInt(questionNumber);
         try {
             showService();
@@ -142,7 +147,7 @@ public class QuestionActivity extends AppCompatActivity {
     public void prev(View view) throws JSONException {
         if (questionId != 0) {
             questionId--;
-            if(questionId<TotalQuestion){
+            if (questionId < TotalQuestion) {
                 submit.setText("Submit");
             }
             showService();
@@ -156,7 +161,7 @@ public class QuestionActivity extends AppCompatActivity {
         dataForValidation.put("QuestionId", questionId);
         dataForValidation.put("Token", token);
         dataForValidation.put("UserId", userId);
-        Toast.makeText(getApplicationContext(),dataForValidation.toString(), Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), dataForValidation.toString(), Toast.LENGTH_LONG).show();
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST,
                 "http://dotnet.nerdcastlebd.com/renew/api/home", dataForValidation,
                 new Response.Listener<JSONObject>() {
@@ -165,9 +170,10 @@ public class QuestionActivity extends AppCompatActivity {
                         nextButton.setVisibility(View.VISIBLE);
                         prevButton.setVisibility(View.VISIBLE);
                         submit.setVisibility(View.VISIBLE);
+                        Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
                         System.out.println(response.toString());
                         try {
-                            if(questionId == TotalQuestion) {
+                            if (questionId == TotalQuestion) {
                                 submit.setText("Finish");
                             }
                             /*else if(questionId<TotalQuestion){
@@ -180,19 +186,19 @@ public class QuestionActivity extends AppCompatActivity {
                             question.setText(serialNmbr + ". " + questionFromJson);
                             numberFromJson = response.getString("NoOfAnswer");
                             number = Integer.parseInt(numberFromJson);
-                           // Toast.makeText(getApplicationContext(), String.valueOf(number), Toast.LENGTH_LONG).show();
+                            // Toast.makeText(getApplicationContext(), String.valueOf(number), Toast.LENGTH_LONG).show();
                             answerArray = response.getJSONArray("AnswerList");
                             isMultiple = response.getString("IsMultipleAnswer");
-                            isEditable=response.getString("IsEditable");
+                            isEditable = response.getString("IsEditable");
                             givenAnswer = response.getJSONArray("GivenAnswers");
                             //Toast.makeText(getApplicationContext(), givenAnswer.toString(), Toast.LENGTH_LONG).show();
                             IsMultipleAnswer = Boolean.parseBoolean(isMultiple);
-                            IsEditable=Boolean.parseBoolean(isEditable);
+                            IsEditable = Boolean.parseBoolean(isEditable);
                             if (IsMultipleAnswer) {
                                 createCheckBox(number, answerArray, givenAnswer);
-                            } else if(IsEditable){
-                                createEditText();
-                            }else {
+                            } else if (IsEditable) {
+                                createEditText(answerArray, givenAnswer);
+                            } else {
                                 createRadioButton(number, answerArray, givenAnswer);
                             }
                         } catch (JSONException e) {
@@ -205,11 +211,11 @@ public class QuestionActivity extends AppCompatActivity {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(),error.toString(),Toast.LENGTH_LONG).show();
-                if(error instanceof NoConnectionError) {
-                String msg = "No internet Access, Check your internet connection.";
-                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
-            }
+                Toast.makeText(getApplicationContext(), error.toString(), Toast.LENGTH_LONG).show();
+                if (error instanceof NoConnectionError) {
+                    String msg = "No internet Access, Check your internet connection.";
+                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                }
             }
         });
         request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
@@ -218,23 +224,30 @@ public class QuestionActivity extends AppCompatActivity {
 
     }
 
-    private void createEditText() {
+    private void createEditText(JSONArray answerArray, JSONArray givenAnswer) throws JSONException {
         mLinearLayout.removeAllViews();
-        EditText editText=new EditText(getApplicationContext());
+        editText = new EditText(getApplicationContext());
         editText.setTextColor(Color.BLACK);
         editText.setBackgroundColor(Color.CYAN);
+        editText.setTag(answerArray.getJSONObject(0));
+
+        //allEds.add(editText);
         mLinearLayout.addView(editText);
+        if (givenAnswer.length()!=0) {
+            String submittedValue=givenAnswer.getJSONObject(0).getString("Description");
+            Toast.makeText(getApplicationContext(), submittedValue, Toast.LENGTH_LONG).show();
+            editText.setText(submittedValue);
+        }
     }
 
 
     public void next(View view) throws JSONException {
-        if (questionId <=TotalQuestion) {
+        if (questionId <= TotalQuestion) {
             if (IsMultipleAnswer) {
-                    checkChange();
-                if(changed){
+                checkChange();
+                if (changed) {
                     userSubmitionRequestForMultipleChoice();
-                }
-                else{
+                } else {
                     questionId++;
 
                     try {
@@ -245,18 +258,23 @@ public class QuestionActivity extends AppCompatActivity {
                     isAnswerChecked = false;
                 }
 
-            }else if(IsEditable){
-                questionId++;
-                try {
-                    showService();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-            else if(!IsMultipleAnswer){
+            } else if (IsEditable) {
                 checkChange();
                 if(changed){
+                    userSubmissionRequest();
+                }else{
+                    questionId++;
+                    try {
+                        showService();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+
+            } else if (!IsMultipleAnswer) {
+                checkChange();
+                if (changed) {
                     userSubmissionRequest();
                 } else {
 
@@ -276,8 +294,8 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     private boolean checkChange() throws JSONException {
-        JSONArray checkedOption=new JSONArray();
-        if(IsMultipleAnswer) {
+        JSONArray checkedOption = new JSONArray();
+        if (IsMultipleAnswer) {
             for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
 
                 View nextChild = mLinearLayout.getChildAt(i);
@@ -285,23 +303,39 @@ public class QuestionActivity extends AppCompatActivity {
                     check = (CheckBox) nextChild;
                     if (check.isChecked()) {
                         answerobject = (JSONObject) check.getTag();
-                        int optionId= Integer.parseInt(answerobject.getString("Id"));
+                        int optionId = Integer.parseInt(answerobject.getString("Id"));
                         checkedOption.put(optionId);
                     }
                 }
             }
-            if(givenAnswer!=null){
-                if(givenAnswer.toString().equals(checkedOption.toString())){
-                    changed=false;
-                }
-                else{
-                    changed=true;
+            if (givenAnswer != null) {
+                if (givenAnswer.toString().equals(checkedOption.toString())) {
+                    changed = false;
+                } else {
+                    changed = true;
                 }
 
             }
 
+        }else if (IsEditable) {
+            String input=editText.getText().toString();
+            if (!input.matches("")) {
+                inputValue=editText.getText().toString();
+            }
+
+            if (givenAnswer.length()!=0) {
+                String submittedAnswer=givenAnswer.getJSONObject(0).getString("Description");
+                if (submittedAnswer.equals(inputValue)) {
+                    changed = false;
+                } else {
+                    changed = true;
+                }
+
+            }
+
+
         }
-        else if(!IsMultipleAnswer) {
+        else if (!IsMultipleAnswer) {
             int optionId = 0;
             if (radioGroup.getCheckedRadioButtonId() != -1) {
                 int id = radioGroup.getCheckedRadioButtonId();
@@ -313,17 +347,14 @@ public class QuestionActivity extends AppCompatActivity {
                 checkedOption.put(optionId);
             }
 
-            if(givenAnswer!=null){
-                if(givenAnswer.toString().equals(checkedOption.toString())){
-                    changed=false;
-                }
-                else{
-                    changed=true;
+            if (givenAnswer != null) {
+                if (givenAnswer.toString().equals(checkedOption.toString())) {
+                    changed = false;
+                } else {
+                    changed = true;
                 }
 
             }
-
-
 
         }
 
@@ -393,7 +424,37 @@ public class QuestionActivity extends AppCompatActivity {
         String selection;
         JSONArray getAnswerArray = new JSONArray();
         try {
-            if (!IsMultipleAnswer) {
+            if (IsEditable) {
+                answerobject = (JSONObject) editText.getTag();
+                inputValue=editText.getText().toString();
+                answerobject.put("Description",inputValue);
+                answerobject.put("Token", token);
+                answerobject.put("UserId", userId);
+                getAnswerArray.put(answerobject);
+                //getAnswerArray.put(tokenNumber);
+                System.out.println(getAnswerArray);
+                //Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
+                JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://dotnet.nerdcastlebd.com/renew/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        //Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
+                    }
+
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if (error instanceof NoConnectionError) {
+                            String msg = "No internet Access, Check your internet connection.";
+                            Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+                request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                AppController.getInstance().addToRequestQueue(request);
+                //Toast.makeText(getApplicationContext(), answerCollection.toString(), Toast.LENGTH_LONG).show();
+
+            }
+            else if (!IsMultipleAnswer) {
                 if (radioGroup.getCheckedRadioButtonId() != -1) {
                     int id = radioGroup.getCheckedRadioButtonId();
                     View radioButton = radioGroup.findViewById(id);
@@ -417,9 +478,9 @@ public class QuestionActivity extends AppCompatActivity {
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError volleyError) {
-                            if(volleyError instanceof NoConnectionError) {
+                            if (volleyError instanceof NoConnectionError) {
                                 String msg = "No internet Access, Check your internet connection.";
-                                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                                Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
                             }
                         }
                     });
@@ -453,9 +514,9 @@ public class QuestionActivity extends AppCompatActivity {
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    if(error instanceof NoConnectionError) {
+                                    if (error instanceof NoConnectionError) {
                                         String msg = "No internet Access, Check your internet connection.";
-                                        Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                                        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
                                     }
                                 }
                             });
@@ -467,13 +528,15 @@ public class QuestionActivity extends AppCompatActivity {
 
                 }
             }
+
+
             if (questionId < TotalQuestion) {
                 questionId++;
                 number = 0;
                 showService();
-            } else if(questionId == TotalQuestion){
-                Intent i=new Intent(getApplicationContext(),HomeActivity.class);
-                i.putExtra("id",userId);
+            } else if (questionId == TotalQuestion) {
+                Intent i = new Intent(getApplicationContext(), HomeActivity.class);
+                i.putExtra("id", userId);
                 startActivity(i);
             }
 

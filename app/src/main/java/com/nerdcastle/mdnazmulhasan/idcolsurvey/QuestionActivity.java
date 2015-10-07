@@ -152,13 +152,13 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     public void prev(View view) throws JSONException {
-        if (questionId != 0) {
+        if (questionId != 1) {
             questionId--;
             if (questionId <= TotalQuestion) {
                 submit.setText("Submit");
             }
             showService();
-        } else if (questionId == 0) {
+        } else if (questionId ==1) {
             Toast.makeText(getApplicationContext(), "there is nothing before this", Toast.LENGTH_LONG).show();
         }
     }
@@ -573,9 +573,14 @@ public class QuestionActivity extends AppCompatActivity {
     }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        InputMethodManager imm = (InputMethodManager)getSystemService(Context.
-                INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        try{
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.
+                    INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
+        }catch (NullPointerException e){
+
+        }
+
         return true;
     }
 }

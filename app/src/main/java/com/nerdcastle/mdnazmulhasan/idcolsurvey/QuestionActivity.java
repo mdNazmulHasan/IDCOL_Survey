@@ -35,9 +35,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class QuestionActivity extends AppCompatActivity {
 
     RadioGroup radioGroup;
@@ -71,6 +68,7 @@ public class QuestionActivity extends AppCompatActivity {
     Boolean timeOut=false;
     String valueAvailable;
     String valueToBeChecked;
+    String givenAnswerID;
     // List<EditText> allEds = new ArrayList<EditText>();
 
 
@@ -112,7 +110,8 @@ public class QuestionActivity extends AppCompatActivity {
 
             mLinearLayout.addView(checkBox);
             for (int index = 0; index < givenAnswer.length(); index++) {
-                if (answerlist.getJSONObject(i).getString("Id").equalsIgnoreCase(String.valueOf(givenAnswer.get(index)))) {
+                givenAnswerID=givenAnswer.getJSONObject(index).getString("Id");
+                if (answerlist.getJSONObject(i).getString("Id").equalsIgnoreCase(givenAnswerID)) {
                     checkBox.setChecked(true);
                 }
             }
@@ -141,7 +140,8 @@ public class QuestionActivity extends AppCompatActivity {
             radioButtons[i].setText(answerlist.getJSONObject(i).getString("Description"));
             //Toast.makeText(getApplicationContext(), "--" + answerlist.getJSONObject(i).getString("Id"), Toast.LENGTH_SHORT).show();
             for (int index = 0; index < givenAnswer.length(); index++) {
-                if (answerlist.getJSONObject(i).getString("Id").equalsIgnoreCase(String.valueOf(givenAnswer.get(index)))) {
+                givenAnswerID=givenAnswer.getJSONObject(index).getString("Id");
+                if (answerlist.getJSONObject(i).getString("Id").equalsIgnoreCase(givenAnswerID)) {
                     radioButtons[i].setChecked(true);
                 }
             }
@@ -154,7 +154,7 @@ public class QuestionActivity extends AppCompatActivity {
     public void prev(View view) throws JSONException {
         if (questionId != 0) {
             questionId--;
-            if (questionId < TotalQuestion) {
+            if (questionId <= TotalQuestion) {
                 submit.setText("Submit");
             }
             showService();
@@ -180,7 +180,7 @@ public class QuestionActivity extends AppCompatActivity {
                         //Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
                         System.out.println(response.toString());
                         try {
-                            if (questionId == TotalQuestion) {
+                            if (questionId == TotalQuestion+1) {
                                 submit.setText("Finish");
                             }
                             /*else if(questionId<TotalQuestion){
@@ -297,8 +297,8 @@ public class QuestionActivity extends AppCompatActivity {
                 }
             }
 
-        } else if (questionId == (TotalQuestion)) {
-            Toast.makeText(getApplicationContext(), "Thats all there is.", Toast.LENGTH_LONG).show();
+        } else if (questionId == TotalQuestion+1) {
+            Toast.makeText(getApplicationContext(), "That's all there is.", Toast.LENGTH_LONG).show();
             submit.setText("Finish");
         }
     }
@@ -331,8 +331,8 @@ public class QuestionActivity extends AppCompatActivity {
                     check = (CheckBox) nextChild;
                     if (check.isChecked()) {
                         answerobject = (JSONObject) check.getTag();
-                        int optionId = Integer.parseInt(answerobject.getString("Id"));
-                        checkedOption.put(optionId);
+                        //int optionId = Integer.parseInt(answerobject.getString("Id"));
+                        checkedOption.put(answerobject);
                     }
                 }
             }
@@ -354,8 +354,8 @@ public class QuestionActivity extends AppCompatActivity {
                 int radioId = radioGroup.indexOfChild(radioButton);
                 RadioButton btn = (RadioButton) radioGroup.getChildAt(radioId);
                 answerobject = (JSONObject) btn.getTag();
-                optionId = Integer.parseInt(answerobject.getString("Id"));
-                checkedOption.put(optionId);
+                //optionId = Integer.parseInt(answerobject.getString("Id"));
+                checkedOption.put(answerobject);
             }
 
             if (givenAnswer != null) {
@@ -561,7 +561,7 @@ public class QuestionActivity extends AppCompatActivity {
                     showService();
                 }
 
-            } else if (questionId == TotalQuestion) {
+            } else if (questionId == TotalQuestion+1) {
                 Intent i = new Intent(getApplicationContext(), HomeActivity.class);
                 i.putExtra("id", userId);
                 startActivity(i);

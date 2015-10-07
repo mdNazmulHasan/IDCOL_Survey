@@ -19,11 +19,11 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="RE Survey"
+        android:text="Mini Grid Customer Survey"
         android:layout_gravity="center"
         android:layout_marginTop="10dp"
         android:textColor="#607d8b"
-        android:textSize="60sp"
+        android:textSize="22sp"
         android:textStyle="bold"
         android:typeface="monospace"/>
 

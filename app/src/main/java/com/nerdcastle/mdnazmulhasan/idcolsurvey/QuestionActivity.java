@@ -69,6 +69,7 @@ public class QuestionActivity extends AppCompatActivity {
     String valueAvailable;
     String valueToBeChecked;
     String givenAnswerID;
+    String selection;
     // List<EditText> allEds = new ArrayList<EditText>();
 
 
@@ -432,42 +433,50 @@ public class QuestionActivity extends AppCompatActivity {
     }
 
     private void answerSubmit() {
-        String selection;
+
         JSONArray getAnswerArray = new JSONArray();
         try {
             if (IsEditable) {
-                answerobject = (JSONObject) editText.getTag();
                 inputValue=editText.getText().toString();
-                answerobject.put("Description",inputValue);
-                answerobject.put("Token", token);
-                answerobject.put("UserId", userId);
-                getAnswerArray.put(answerobject);
-                //getAnswerArray.put(tokenNumber);
-                System.out.println(getAnswerArray);
-                //Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
-                JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://dotnet.nerdcastlebd.com/renew/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        //Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
-                    }
+                if(inputValue.length()>0){
+                    answerobject = (JSONObject) editText.getTag();
 
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if(error instanceof TimeoutError) {
-                            String msg = "Request Timed Out, Pls try again";
-                            timeOut=true;
-                            Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                    answerobject.put("Description",inputValue);
+                    answerobject.put("Token", token);
+                    answerobject.put("UserId", userId);
+                    getAnswerArray.put(answerobject);
+                    //getAnswerArray.put(tokenNumber);
+                    System.out.println(getAnswerArray);
+                    //Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
+                    JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://dotnet.nerdcastlebd.com/renew/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
+                        @Override
+                        public void onResponse(JSONArray response) {
+                            //Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
                         }
-                        else if(error instanceof NoConnectionError) {
-                            String msg = "No internet Access, Check your internet connection.";
-                            Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            if(error instanceof TimeoutError) {
+                                String msg = "Request Timed Out, Pls try again";
+                                timeOut=true;
+                                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                            }
+                            else if(error instanceof NoConnectionError) {
+                                String msg = "No internet Access, Check your internet connection.";
+                                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                            }
                         }
-                    }
-                });
-                request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                AppController.getInstance().addToRequestQueue(request);
-                //Toast.makeText(getApplicationContext(), answerCollection.toString(), Toast.LENGTH_LONG).show();
+                    });
+                    request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                    AppController.getInstance().addToRequestQueue(request);
+                    //Toast.makeText(getApplicationContext(), answerCollection.toString(), Toast.LENGTH_LONG).show();
+                    questionIncrement();
+                }
+                else{
+                    Toast.makeText(getApplicationContext(),"Please insert some data", Toast.LENGTH_LONG).show();
+                }
+
 
             }
             else if (!IsMultipleAnswer) {
@@ -506,10 +515,12 @@ public class QuestionActivity extends AppCompatActivity {
                     });
                     request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                     AppController.getInstance().addToRequestQueue(request);
+                    questionIncrement();
                 } else {
                     selection = "select one pls!";
                     Toast.makeText(getApplicationContext(), selection, Toast.LENGTH_LONG).show();
                 }
+
             } else if (IsMultipleAnswer) {
 
                 for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
@@ -546,31 +557,42 @@ public class QuestionActivity extends AppCompatActivity {
                             });
                             request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
                             AppController.getInstance().addToRequestQueue(request);
+                            questionIncrement();
                             //Toast.makeText(getApplicationContext(), answerCollection.toString(), Toast.LENGTH_LONG).show();
+                        }
+                        else{
+                            selection = "select one pls!";
+                            Toast.makeText(getApplicationContext(), selection, Toast.LENGTH_LONG).show();
                         }
                     }
 
                 }
+
             }
 
 
-            if (questionId < TotalQuestion) {
-                if(!timeOut){
-                    questionId++;
-                    number = 0;
-                    showService();
-                }
 
-            } else if (questionId == TotalQuestion+1) {
-                Intent i = new Intent(getApplicationContext(), HomeActivity.class);
-                i.putExtra("id", userId);
-                startActivity(i);
-            }
 
         } catch (Exception e) {
             Toast.makeText(getApplicationContext(), "Check your internet connection", Toast.LENGTH_LONG).show();
         }
     }
+
+    private void questionIncrement() throws JSONException {
+        if (questionId < TotalQuestion) {
+            if(!timeOut){
+                questionId++;
+                number = 0;
+                showService();
+            }
+
+        } else if (questionId == TotalQuestion+1) {
+            Intent i = new Intent(getApplicationContext(), HomeActivity.class);
+            i.putExtra("id", userId);
+            startActivity(i);
+        }
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         try{

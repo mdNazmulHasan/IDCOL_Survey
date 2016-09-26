@@ -35,6 +35,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
+
 public class QuestionActivity extends AppCompatActivity {
 
     RadioGroup radioGroup;
@@ -70,6 +72,8 @@ public class QuestionActivity extends AppCompatActivity {
     String valueToBeChecked;
     String givenAnswerID;
     String selection;
+    boolean selected=false;
+    ArrayList<Integer>checkedOption;
     // List<EditText> allEds = new ArrayList<EditText>();
 
 
@@ -314,7 +318,7 @@ public class QuestionActivity extends AppCompatActivity {
             }
             if (givenAnswer.length()!=0) {
                 String submittedAnswer=givenAnswer.getJSONObject(0).getString("Description");
-                Toast.makeText(getApplicationContext(),submittedAnswer, Toast.LENGTH_LONG).show();
+                //Toast.makeText(getApplicationContext(),submittedAnswer, Toast.LENGTH_LONG).show();
                 if (submittedAnswer.equalsIgnoreCase(valueToBeChecked)) {
                     changed = false;
                 } else {
@@ -347,7 +351,7 @@ public class QuestionActivity extends AppCompatActivity {
             }
 
         }
-        else if (!IsMultipleAnswer) {
+        else {
             int optionId = 0;
             if (radioGroup.getCheckedRadioButtonId() != -1) {
                 int id = radioGroup.getCheckedRadioButtonId();
@@ -446,7 +450,7 @@ public class QuestionActivity extends AppCompatActivity {
                     answerobject.put("UserId", userId);
                     getAnswerArray.put(answerobject);
                     //getAnswerArray.put(tokenNumber);
-                    System.out.println(getAnswerArray);
+                    //System.out.println(getAnswerArray);
                     //Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
                     JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://dotnet.nerdcastlebd.com/renew/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
                         @Override
@@ -489,7 +493,7 @@ public class QuestionActivity extends AppCompatActivity {
                     answerobject.put("Token", token);
                     answerobject.put("UserId", userId);
                     getAnswerArray.put(answerobject);
-                    System.out.println(getAnswerArray);
+                   // System.out.println(getAnswerArray);
                     //Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
 
                     JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://dotnet.nerdcastlebd.com/renew/api/answers",
@@ -521,7 +525,8 @@ public class QuestionActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), selection, Toast.LENGTH_LONG).show();
                 }
 
-            } else if (IsMultipleAnswer) {
+            } else {
+                checkedOption=new ArrayList<>();
 
                 for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
 
@@ -529,44 +534,51 @@ public class QuestionActivity extends AppCompatActivity {
                     if (nextChild instanceof CheckBox) {
                         check = (CheckBox) nextChild;
                         if (check.isChecked()) {
+                            checkedOption.add(i);
+                            selected=true;
                             answerobject = (JSONObject) check.getTag();
                             answerobject.put("Token", token);
                             answerobject.put("UserId", userId);
                             getAnswerArray.put(answerobject);
-                            //getAnswerArray.put(tokenNumber);
-                            System.out.println(getAnswerArray);
-                            //Toast.makeText(getApplicationContext(), getAnswerArray.toString(), Toast.LENGTH_LONG).show();
-                            JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://dotnet.nerdcastlebd.com/renew/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
-                                @Override
-                                public void onResponse(JSONArray response) {
-                                    //Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
-                                }
 
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    if(error instanceof TimeoutError) {
-                                        String msg = "Request Timed Out, Pls try again";
-                                        Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
-                                    }
-                                    else if(error instanceof NoConnectionError) {
-                                        String msg = "No internet Access, Check your internet connection.";
-                                        Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
-                                    }
-                                }
-                            });
-                            request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-                            AppController.getInstance().addToRequestQueue(request);
-                            questionIncrement();
-                            //Toast.makeText(getApplicationContext(), answerCollection.toString(), Toast.LENGTH_LONG).show();
+                        }else{
+
+
+
                         }
-                        else{
-                            selection = "select one pls!";
-                            Toast.makeText(getApplicationContext(), selection, Toast.LENGTH_LONG).show();
-                        }
+
                     }
 
                 }
+                if(checkedOption.size()==0){
+                    selection = "Select one pls!";
+                    Toast.makeText(getApplicationContext(), selection, Toast.LENGTH_LONG).show();
+                }else {
+                    JsonArrayRequest request = new JsonArrayRequest(Request.Method.POST, "http://dotnet.nerdcastlebd.com/renew/api/answers", getAnswerArray, new Response.Listener<JSONArray>() {
+                        @Override
+                        public void onResponse(JSONArray response) {
+                            //Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
+                        }
+
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            if(error instanceof TimeoutError) {
+                                String msg = "Request Timed Out, Pls try again";
+                                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                            }
+                            else if(error instanceof NoConnectionError) {
+                                String msg = "No internet Access, Check your internet connection.";
+                                Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    });
+                    request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+                    AppController.getInstance().addToRequestQueue(request);
+                    questionIncrement();
+                }
+
+
 
             }
 
@@ -581,7 +593,7 @@ public class QuestionActivity extends AppCompatActivity {
     private void questionIncrement() throws JSONException {
         if (questionId < TotalQuestion) {
             if(!timeOut){
-                questionId++;
+                questionId=questionId+1;
                 number = 0;
                 showService();
             }

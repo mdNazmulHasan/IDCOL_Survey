@@ -9,23 +9,14 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="IDCOL"
+        android:text="Super Survey"
         android:layout_gravity="center"
         android:layout_marginTop="50dp"
         android:textColor="#607d8b"
-        android:textSize="60sp"
+        android:textSize="40sp"
         android:textStyle="bold"
         android:typeface="monospace"/>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mini Grid Customer Survey"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
-        android:textColor="#607d8b"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:typeface="monospace"/>
+
 
     <at.markushi.ui.CircleButton
         android:layout_width="148dp"

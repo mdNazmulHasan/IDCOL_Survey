@@ -18,8 +18,9 @@
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
             android:gravity="center"
+            android:textStyle="bold|italic"
             android:text="Welcome"
-            android:textSize="30sp"
+            android:textSize="50sp"
             android:textColor="#009688"/>
 
     </RelativeLayout>
@@ -28,7 +29,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.5"
+        android:layout_weight="0.7"
         android:orientation="vertical">
 
         <android.support.design.widget.TextInputLayout
@@ -40,7 +41,10 @@
                 android:id="@+id/username"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#009688"
+                android:background="#03A9F4"
+                android:textSize="30sp"
+                android:textColor="#ffffff"
+                android:paddingLeft="8dp"
                 android:inputType="textEmailAddress"
                 android:hint="Username"/>
 
@@ -57,7 +61,10 @@
                 android:id="@+id/password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#009688"
+                android:background="#03A9F4"
+                android:textSize="30sp"
+                android:textColor="#ffffff"
+                android:paddingLeft="8dp"
                 android:inputType="textPassword"
                 android:hint="Password"/>
 
@@ -65,10 +72,10 @@
 
         <Button
             android:id="@+id/btn"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="30dp"
             android:layout_width="match_parent"
             android:onClick="login"
-            android:background="#03A9F4"
+            android:background="#03212e"
             android:textColor="#ffffff"
             android:textStyle="bold"
             android:layout_height="wrap_content"

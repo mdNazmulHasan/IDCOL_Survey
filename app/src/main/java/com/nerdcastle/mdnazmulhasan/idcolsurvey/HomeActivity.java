@@ -31,7 +31,6 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.home_screen);
         userId=getIntent().getStringExtra("id");
-        //Toast.makeText(getApplicationContext(),userId,Toast.LENGTH_LONG).show();
 
     }
     public void start(View view) throws JSONException {
@@ -43,16 +42,14 @@ public class HomeActivity extends AppCompatActivity {
                 try {
                     token=response.getString("Token");
                     questionNumber=response.getString("NoOfQuestion");
-                    //Toast.makeText(getApplicationContext(),token,Toast.LENGTH_LONG).show();
                     Intent i=new Intent(getApplicationContext(),QuestionActivity.class);
                     i.putExtra("token",token);
                     i.putExtra("questionNumber",questionNumber);
                     i.putExtra("id",userId);
                     startActivity(i);
                 } catch (JSONException e) {
-                    //Toast.makeText(getApplicationContext(),e.toString(),Toast.LENGTH_LONG).show();
+
                 }
-                //Toast.makeText(getApplicationContext(), response.toString(), Toast.LENGTH_LONG).show();
 
             }
         }, new Response.ErrorListener() {

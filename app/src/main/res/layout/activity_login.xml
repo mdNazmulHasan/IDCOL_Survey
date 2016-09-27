@@ -19,7 +19,7 @@
             android:layout_centerInParent="true"
             android:gravity="center"
             android:textStyle="bold|italic"
-            android:text="Welcome"
+            android:text="@string/welcome"
             android:textSize="50sp"
             android:textColor="#009688"/>
 
@@ -44,9 +44,9 @@
                 android:background="#03A9F4"
                 android:textSize="30sp"
                 android:textColor="#ffffff"
-                android:paddingLeft="8dp"
+                android:paddingLeft="@dimen/editTextStart"
                 android:inputType="textEmailAddress"
-                android:hint="Username"/>
+                android:hint="@string/username"/>
 
         </android.support.design.widget.TextInputLayout>
 

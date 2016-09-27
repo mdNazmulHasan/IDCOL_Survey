@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Super Survey</string>
+    <string name="welcome">Welcome</string>
+    <string name="username">Username</string>
 </resources>

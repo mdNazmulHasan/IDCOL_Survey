@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -60,11 +61,10 @@ public class LoginActivity extends AppCompatActivity {
                     Boolean result=jsonObject.getBoolean("ResultState");
                     String userId=jsonObject.getString("Id");
                     System.out.println(userId);
-                   // Toast.makeText(getApplicationContext(),userId, Toast.LENGTH_LONG).show();
                     if(result){
-                        //Toast.makeText(getApplicationContext(),result.toString(), Toast.LENGTH_LONG).show();
                         Intent i=new Intent(getApplicationContext(),HomeActivity.class);
                         i.putExtra("id",userId);
+                        Log.e("id", "onResponse: "+userId);
                         startActivity(i);
                     }
                     else if(!result){
@@ -91,8 +91,6 @@ public class LoginActivity extends AppCompatActivity {
         });
         request.setRetryPolicy(new DefaultRetryPolicy(DefaultRetryPolicy.DEFAULT_TIMEOUT_MS, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         AppController.getInstance().addToRequestQueue(request);
-
-        //Toast.makeText(getApplicationContext(), request.toString(), Toast.LENGTH_LONG).show();
     }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
